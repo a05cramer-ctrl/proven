@@ -1,0 +1,453 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>PROVEN</title>
+<meta name="description" content="An AI uses the product before you buy the coin. Paste any tech coin's CA: a robot opens its site in a real browser, tries the product and stamps it WORKS or NOTHING WORKS, with the recording.">
+<meta property="og:title" content="PROVEN — An AI uses the product before you buy the coin.">
+<meta property="og:description" content="Paste any tech coin's CA. A robot opens its site, tries the product and stamps it WORKS or NOTHING WORKS, with the recording.">
+<meta property="og:image" content="/og.jpg">
+<meta name="twitter:image" content="/og.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#000000">
+<link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAIAAAAlC+aJAAABYUlEQVR42u2aPwuCUBTFVVqFhpYgGiKCoKmtWqqlxvY+n7ujLdWSbU1CENEQQUtD4AeoQbiJrx4+fea/c6YHkt7L/XXe9foUBYJiSU3u1oPXkNZ71U7oKVreK6ABwp8yTMswLVQACSABJFDsBCTvxAfn5C2ajXrg0vV29xb9XgcVKCFCHDbkSpQ0IJRxhDjkrLY7iXHMxqNoLAGhtFUR/UGtqica0OPpYiNDAln8D0g0Tf64hR7UbbeAUE4R8hsZbYcSyXE30Y2VNXEglLudmFVv/XEVfRK0F5YcZ2qjAsVGSNR5/EgQThLJ4ccDhDKI0PF8oXXIhoTFiViK7zkUz9dggFAGEaJK+VlKVxyShccqf3snxlilqM0clTjpyRyauWIgxDop2VHkoods3UKaOBBScvKJiY5tiLZ3kVu35WIOhCAIKt1hD47bivojmrnyIESvnSGPgvgnbfHPDgGhtPUGTdyAeO6ad/UAAAAASUVORK5CYII=">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@500;700&family=Hanken+Grotesk:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a test bench. Left the claim and the CA slot, right the robot whose visor IS the screen: it plays the test, then the stamp. Below: the wall of verdicts, the rules, the coin. One look, dark: the PFP's black, its greys, its green. */
+:root{
+  color-scheme:dark;
+  --bg:#000; --panel:#0b0d0e; --line:#1d2225; --line2:#2c3338;
+  --fg:#eceff2; --mut:#8e989f; --dim:#5b656c;
+  --grey:#ced4da; --steel:#a5b0b8;
+  --ok:#39ff3a; --ok2:#2cbe3a; --bad:#ff3d3d; --warn:#ffc21a;
+  --px:"Pixelify Sans","DM Mono",ui-monospace,monospace; --sans:"Hanken Grotesk",system-ui,-apple-system,"Segoe UI",sans-serif; --mono:"DM Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --ease:cubic-bezier(.16,1,.3,1);
+}
+*{box-sizing:border-box}
+html,body{overflow-x:clip}
+body{background:var(--bg);color:var(--fg);font:400 16px/1.55 var(--sans);-webkit-font-smoothing:antialiased}
+a{color:inherit}
+button{font:inherit;color:inherit}
+.wrap{max-width:1160px;margin:0 auto;padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px))}
+.pix{image-rendering:pixelated;image-rendering:crisp-edges}
+.mono{font-family:var(--mono)}
+:focus-visible{outline:2px solid var(--ok);outline-offset:3px}
+
+/* nav */
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;background:rgba(0,0,0,.86);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.nav .wrap{display:flex;align-items:center;gap:22px;height:60px}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;font:700 22px/1 var(--px);letter-spacing:.02em}
+.brand img{width:34px;height:34px}
+.links{display:flex;gap:22px;margin-left:10px;font:500 13px var(--mono);color:var(--mut)}
+.links a{text-decoration:none}.links a:hover{color:var(--fg)}
+.nav .sp{flex:1}
+.chip{display:inline-flex;align-items:center;gap:8px;height:34px;padding:0 12px;border:1px solid var(--line2);background:transparent;font:500 12px var(--mono);color:var(--grey);cursor:pointer;max-width:100%}
+.chip:hover{border-color:var(--ok);color:var(--fg)}
+.chip code{font:inherit;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.chip b{color:var(--ok);font-weight:500}
+.navx{font:500 13px var(--mono);color:var(--mut);text-decoration:none}.navx:hover{color:var(--fg)}
+@media(max-width:820px){.links{display:none}.nav .chip code{max-width:92px}}
+
+/* hero */
+.hero{padding-block:54px 40px}
+.hero .wrap{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);gap:44px;align-items:center}
+h1{font:700 clamp(38px,5.3vw,68px)/1.02 var(--px);letter-spacing:.005em;margin:0 0 18px;text-wrap:balance}
+h1 em{font-style:normal;color:var(--ok)}
+.lede{font-size:18px;color:var(--grey);max-width:34em;margin:0 0 26px}
+.slot{display:flex;gap:0;border:2px solid var(--grey);background:var(--panel);max-width:600px}
+.slot:focus-within{border-color:var(--ok)}
+.slot input{flex:1;min-width:0;height:56px;padding:0 16px;background:transparent;border:0;color:var(--fg);font:400 15px var(--mono);outline:0}
+.slot input::placeholder{color:var(--dim)}
+.go{height:56px;padding:0 22px;border:0;background:var(--ok);color:#001a02;font:700 19px/1 var(--px);letter-spacing:.03em;cursor:pointer;white-space:nowrap}
+.go:hover{background:#7dff7e}.go:disabled{background:var(--line2);color:var(--mut);cursor:default}
+.msg{min-height:22px;margin:10px 0 0;font:400 13px var(--mono);color:var(--mut)}
+.msg.err{color:var(--bad)}.msg.okc{color:var(--ok)}
+.fine{margin:14px 0 0;font:400 12.5px var(--mono);color:var(--dim);max-width:46em}
+.fine b{color:var(--steel);font-weight:500}
+
+/* the robot: its visor is the screen */
+.bot{position:relative;width:100%;max-width:520px;margin:0 auto;aspect-ratio:1}
+.bot>img{position:absolute;inset:0;width:100%;height:100%}
+.visor{position:absolute;left:25%;top:34.375%;width:50%;height:35.94%;overflow:hidden;background:#000}
+.visor video,.visor .poster{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.vlab{position:absolute;left:6px;top:5px;font:500 10px/1 var(--mono);color:var(--ok);letter-spacing:.06em;text-transform:uppercase;z-index:3;text-shadow:0 0 0 #000,1px 1px 0 #000}
+.scan{position:absolute;inset:0;background:repeating-linear-gradient(0deg,rgba(0,0,0,.22) 0 1px,transparent 1px 3px);pointer-events:none;z-index:2}
+/* idle face / stage drawn in DOM, scaled with the visor */
+.stage{position:absolute;inset:0;container-type:size}
+.pg{position:absolute;left:8cqw;top:14cqh;right:8cqw;bottom:10cqh;border:.8cqw solid var(--line2);background:#06080a;opacity:0}
+.pg i{position:absolute;display:block;background:var(--line2)}
+.pg .t1{left:6cqw;top:8cqh;width:38cqw;height:5cqh;background:var(--steel)}
+.pg .t2{left:6cqw;top:20cqh;width:54cqw;height:3cqh}
+.pg .t3{left:6cqw;top:27cqh;width:44cqw;height:3cqh}
+.pg .btn{left:6cqw;top:42cqh;width:30cqw;height:13cqh;background:transparent;border:.8cqw solid var(--grey)}
+.pg .btn.dead{border-color:var(--bad)}
+.pg .btn.live{border-color:var(--ok);background:rgba(57,255,58,.18)}
+.cur{position:absolute;width:5cqw;height:5cqw;margin:-2.5cqw 0 0 -2.5cqw;border-radius:50%;border:.7cqw solid var(--ok);background:rgba(57,255,58,.3);left:0;top:0;opacity:0;z-index:4}
+.face{position:absolute;inset:0;display:grid;place-items:center}
+.face svg{width:46%;height:auto}
+.stamp{position:absolute;left:50%;top:50%;z-index:5;font:700 11cqw/1 var(--px);letter-spacing:.04em;padding:3cqh 3.5cqw;border:1cqw solid currentColor;white-space:nowrap;transform:translate(-50%,-50%) rotate(-7deg) scale(1);opacity:0;background:rgba(0,0,0,.72)}
+.stamp.ok{color:var(--ok)}.stamp.bad{color:var(--bad)}.stamp.down{color:var(--warn)}
+.light{position:absolute;left:46.875%;top:4.6875%;width:6.25%;height:4.6875%;background:var(--ok)}
+.bot.busy .light{animation:blink .6s steps(2) infinite}
+.bot.fail .light{background:var(--bad)}
+@keyframes blink{50%{opacity:.15}}
+
+/* result */
+.result{padding-block:6px 30px}
+.card{border:1px solid var(--line2);background:var(--panel);display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr)}
+.card .media{position:relative;background:#000;border-right:1px solid var(--line2);min-height:300px;display:grid;place-items:center}
+.card .media video,.card .media img{width:100%;height:auto;max-height:520px;object-fit:contain;display:block}
+.card .media .wait{position:absolute;inset:0;display:grid;place-items:center;text-align:center;font:400 13px var(--mono);color:var(--mut);padding:20px}
+.card .info{padding:22px 24px;min-width:0}
+.coin{display:flex;align-items:center;gap:10px;font:500 13px var(--mono);color:var(--mut);min-width:0}
+.coin b{color:var(--fg);font:700 20px var(--px)}
+.coin a{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.big{display:inline-block;margin:14px 0 10px;font:700 clamp(26px,3.4vw,40px)/1 var(--px);letter-spacing:.04em;padding:10px 14px;border:3px solid currentColor;transform:rotate(-2deg)}
+.big.ok{color:var(--ok)}.big.bad{color:var(--bad)}.big.down{color:var(--warn)}.big.run{color:var(--steel);transform:none}
+.sum{margin:6px 0 14px;color:var(--grey)}
+.ev{list-style:none;margin:0 0 14px;padding:0;display:grid;gap:6px;font:400 13px var(--mono);color:var(--steel)}
+.ev li::before{content:"▪ ";color:var(--ok)}
+.steps{margin:0;padding:0;list-style:none;display:grid;gap:4px;font:400 12.5px var(--mono);color:var(--mut);max-height:190px;overflow:auto;border-top:1px solid var(--line);padding-top:12px}
+.steps .d{color:var(--bad)}.steps .w{color:var(--ok)}
+.acts{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
+.btn2{display:inline-flex;align-items:center;height:38px;padding:0 14px;border:1px solid var(--line2);background:transparent;font:500 13px var(--mono);text-decoration:none;cursor:pointer}
+.btn2:hover{border-color:var(--grey)}
+.btn2.p{background:var(--fg);color:#000;border-color:var(--fg)}
+@media(max-width:860px){.card{grid-template-columns:1fr}.card .media{border-right:0;border-bottom:1px solid var(--line2)}}
+
+/* strip */
+.strip{border-block:1px solid var(--line);margin-top:18px}
+.strip .wrap{display:grid;grid-template-columns:repeat(5,minmax(0,1fr))}
+.st{padding:20px 0;border-left:1px solid var(--line);padding-left:18px}
+.st:first-child{border-left:0;padding-left:0}
+.st b{display:block;font:700 30px/1 var(--px);font-variant-numeric:tabular-nums}
+.st span{font:400 12px var(--mono);color:var(--mut)}
+.st .g{color:var(--ok)}.st .r{color:var(--bad)}
+.sk{display:inline-block;min-width:1.6em;height:.9em;background:var(--line);animation:blink 1.2s steps(2) infinite;vertical-align:-.05em}
+@media(max-width:760px){.strip .wrap{grid-template-columns:repeat(2,minmax(0,1fr))}.st{border-left:0;padding-left:0;padding-block:14px}}
+
+section{padding-block:64px}
+h2{font:700 clamp(28px,3.4vw,40px)/1.05 var(--px);margin:0 0 8px;text-wrap:balance}
+.sub{color:var(--mut);max-width:44em;margin:0 0 28px}
+
+/* wall */
+.wall{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+.tile{border:1px solid var(--line2);background:var(--panel);text-align:left;padding:0;cursor:pointer;display:block;min-width:0}
+.tile:hover{border-color:var(--grey)}
+.tile .th{aspect-ratio:16/9;background:#000 center/cover no-repeat;position:relative;border-bottom:1px solid var(--line2)}
+.tile .tg{position:absolute;left:10px;bottom:10px;font:700 15px/1 var(--px);letter-spacing:.04em;padding:5px 7px;border:2px solid currentColor;background:rgba(0,0,0,.8)}
+.tile .tg.ok{color:var(--ok)}.tile .tg.bad{color:var(--bad)}.tile .tg.down{color:var(--warn)}
+.tile .tb{padding:12px 14px}
+.tile .tn{font:700 17px var(--px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tile .ts{font:400 12px var(--mono);color:var(--mut);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.empty{border:1px dashed var(--line2);padding:28px;font:400 14px var(--mono);color:var(--mut)}
+.ghost{height:210px;border:1px solid var(--line);background:linear-gradient(90deg,var(--panel),#101416,var(--panel));background-size:200% 100%;animation:sh 1.4s linear infinite}
+@keyframes sh{to{background-position:-200% 0}}
+
+/* how + verify */
+.how{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.how div{border:1px solid var(--line2);padding:22px;background:var(--panel)}
+.how h3{font:700 21px var(--px);margin:0 0 6px}
+.how p{margin:0;color:var(--grey);font-size:15px}
+.how .k{font:500 12px var(--mono);color:var(--ok);margin-bottom:10px}
+.rules{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0;border:1px solid var(--line2)}
+.rules div{padding:20px 22px;border-bottom:1px solid var(--line);border-right:1px solid var(--line);min-width:0}
+.rules b{display:block;font:700 18px var(--px);margin-bottom:4px}
+.rules p{margin:0;color:var(--grey);font-size:15px}
+.rules a{color:var(--ok)}
+@media(max-width:760px){.how,.rules{grid-template-columns:1fr}}
+
+/* coin */
+.tok{border:2px solid var(--grey);padding:30px;display:grid;grid-template-columns:auto minmax(0,1fr);gap:26px;align-items:center}
+.tok img{width:120px;height:120px}
+.tok p{margin:0 0 16px;color:var(--grey);max-width:40em}
+@media(max-width:640px){.tok{grid-template-columns:1fr}}
+details{border-bottom:1px solid var(--line);padding:16px 0}
+summary{cursor:pointer;font:600 17px var(--sans);list-style:none}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";float:right;font:500 18px var(--mono);color:var(--mut)}
+details[open] summary::after{content:"–"}
+details p{margin:10px 0 0;color:var(--grey);max-width:60em}
+footer{border-top:1px solid var(--line);padding-block:26px;font:400 12.5px var(--mono);color:var(--dim)}
+footer .wrap{display:flex;flex-wrap:wrap;gap:16px;justify-content:space-between}
+footer a{color:var(--mut)}
+
+/* intro: the visor full screen, then it shrinks into the robot */
+#intro{position:fixed;inset:0;z-index:50;background:#000;display:grid;place-items:center;cursor:pointer}
+#intro .ibot{position:relative;width:min(84vmin,640px);aspect-ratio:1;transform-origin:50% 52.3%}
+#intro .ibot>img{position:absolute;inset:0;width:100%;height:100%}
+#intro .skip{position:absolute;right:max(18px,env(safe-area-inset-right,0px));bottom:calc(18px + env(safe-area-inset-bottom,0px));font:500 12px var(--mono);color:var(--dim);background:none;border:0;cursor:pointer}
+.rv{opacity:1}
+.pre .rv{opacity:0;transform:translateY(12px)}
+.rv{transition:opacity .6s var(--ease),transform .6s var(--ease)}
+@media(max-width:900px){.hero .wrap{grid-template-columns:1fr;gap:26px}.bot{max-width:360px;order:-1}.hero{padding-block:26px 30px}}
+@media(prefers-reduced-motion:reduce){.rv{transition:none}.bot.busy .light,.sk,.ghost{animation:none}}
+</style>
+
+<style>[hidden]{display:none!important}body{margin:0}img{max-width:100%}</style>
+</head>
+<body>
+<div id="intro" hidden aria-hidden="true">
+  <div class="ibot"><img class="pix" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAIAAAAlC+aJAAABPklEQVR42mNgGAWjgCLASDujLf9bwdnHGY/RyBamoR4DTKOJECdYumHH0g07RmNg1AOjHhj1wPD2AJVr4nNXbkEYcjKSaFKPnjyHMIx01EZjYAQmITxpg7qA1JQ2moQGeRLCk3J2HjhKRXe4O1iTl5ZGk9BAAxZSNYgI8NLUQW8+fB6tyEY9MBjzAHULTWIs0lRRGk1CQzQJIRdk8OpwAAGyezAL8dEkNOqBUQ8Mv1JoMJQ8xLtnNAkNwiR0/c49OJvIBglNAdw9WB0zmoQGYRKCxxRyWhpYgCclkzysQrc+8eiwynAdVoFHMa1H5kYbc8MjCWGWpPDiiOxIJ7LpRmQhPpqEGIbIFBN82Qatm3fwlBMd4DGahEbBKBgFI26xB57SltTycbQxN3KSELzbSeRSEOSRNsrXDo0moYEGAE3KZXYiFGGTAAAAAElFTkSuQmCC" alt=""><div class="visor"><div class="stage" id="istage"></div><div class="scan"></div></div></div>
+  <button class="skip" type="button" tabindex="-1">Skip</button>
+</div>
+
+<header class="nav"><div class="wrap">
+  <a class="brand" href="#top"><img class="pix" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAIAAAAlC+aJAAABYUlEQVR42u2aPwuCUBTFVVqFhpYgGiKCoKmtWqqlxvY+n7ujLdWSbU1CENEQQUtD4AeoQbiJrx4+fea/c6YHkt7L/XXe9foUBYJiSU3u1oPXkNZ71U7oKVreK6ABwp8yTMswLVQACSABJFDsBCTvxAfn5C2ajXrg0vV29xb9XgcVKCFCHDbkSpQ0IJRxhDjkrLY7iXHMxqNoLAGhtFUR/UGtqica0OPpYiNDAln8D0g0Tf64hR7UbbeAUE4R8hsZbYcSyXE30Y2VNXEglLudmFVv/XEVfRK0F5YcZ2qjAsVGSNR5/EgQThLJ4ccDhDKI0PF8oXXIhoTFiViK7zkUz9dggFAGEaJK+VlKVxyShccqf3snxlilqM0clTjpyRyauWIgxDop2VHkoods3UKaOBBScvKJiY5tiLZ3kVu35WIOhCAIKt1hD47bivojmrnyIESvnSGPgvgnbfHPDgGhtPUGTdyAeO6ad/UAAAAASUVORK5CYII=" alt="">PROVEN</a>
+  <nav class="links"><a href="#tested">Tested</a><a href="#how">How it works</a><a href="#verify">Verify</a><a href="#coin">$PROVEN</a></nav>
+  <span class="sp"></span>
+  <button class="chip" id="ca" type="button" hidden><b>CA</b><code id="cat"></code><span id="cac">copy</span></button>
+  <a class="navx" id="x" href="#" target="_blank" rel="noopener" hidden>X ↗</a>
+</div></header>
+
+<main id="top">
+<section class="hero"><div class="wrap">
+  <div>
+    <h1 class="rv">An AI uses the product <em>before you buy the coin.</em></h1>
+    <p class="lede rv">Paste a tech coin's CA. A robot opens the coin's own site in a real browser, connects a test wallet, tries the product and stamps it. You get the recording.</p>
+    <form class="slot rv" id="f" autocomplete="off">
+      <input id="mint" name="mint" inputmode="text" spellcheck="false" placeholder="Paste a contract address" aria-label="Contract address">
+      <button class="go" id="go" type="submit">TEST IT</button>
+    </form>
+    <p class="msg" id="msg" role="status"></p>
+    <p class="fine rv">One test per coin per <b id="ch">24</b> h · <b id="capleft"><span class="sk"></span></b> free tests left today · takes about two minutes</p>
+  </div>
+  <div class="bot rv" id="bot">
+    <img class="pix" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAIAAAAlC+aJAAABPklEQVR42mNgGAWjgCLASDujLf9bwdnHGY/RyBamoR4DTKOJECdYumHH0g07RmNg1AOjHhj1wPD2AJVr4nNXbkEYcjKSaFKPnjyHMIx01EZjYAQmITxpg7qA1JQ2moQGeRLCk3J2HjhKRXe4O1iTl5ZGk9BAAxZSNYgI8NLUQW8+fB6tyEY9MBjzAHULTWIs0lRRGk1CQzQJIRdk8OpwAAGyezAL8dEkNOqBUQ8Mv1JoMJQ8xLtnNAkNwiR0/c49OJvIBglNAdw9WB0zmoQGYRKCxxRyWhpYgCclkzysQrc+8eiwynAdVoFHMa1H5kYbc8MjCWGWpPDiiOxIJ7LpRmQhPpqEGIbIFBN82Qatm3fwlBMd4DGahEbBKBgFI26xB57SltTycbQxN3KSELzbSeRSEOSRNsrXDo0moYEGAE3KZXYiFGGTAAAAAElFTkSuQmCC" alt="PROVEN, a pixel robot whose visor is a screen">
+    <div class="light"></div>
+    <div class="visor" id="visor"><span class="vlab" id="vlab"></span><div class="stage" id="stage"></div><div class="scan"></div></div>
+  </div>
+</div></section>
+
+<section class="result" id="result" hidden><div class="wrap">
+  <div class="card">
+    <div class="media" id="media"></div>
+    <div class="info">
+      <div class="coin"><b id="rname"></b><a id="rsite" href="#" target="_blank" rel="noopener nofollow"></a></div>
+      <div class="big run" id="rverdict"></div>
+      <p class="sum" id="rsum"></p>
+      <ul class="ev" id="rev"></ul>
+      <ol class="steps" id="rsteps"></ol>
+      <div class="acts" id="racts"></div>
+    </div>
+  </div>
+</div></section>
+
+<div class="strip"><div class="wrap">
+  <div class="st"><b data-s="tests"><span class="sk"></span></b><span>tests run</span></div>
+  <div class="st"><b class="g" data-s="works"><span class="sk"></span></b><span>WORKS</span></div>
+  <div class="st"><b class="r" data-s="nothing"><span class="sk"></span></b><span>NOTHING WORKS</span></div>
+  <div class="st"><b data-s="coins"><span class="sk"></span></b><span>coins tested</span></div>
+  <div class="st"><b data-s="in_flight"><span class="sk"></span></b><span>testing right now</span></div>
+</div></div>
+
+<section id="tested"><div class="wrap">
+  <h2>Tested</h2>
+  <p class="sub">Every verdict, newest first. Open one for the recording and what each click did.</p>
+  <div class="wall" id="wall"><div class="ghost"></div><div class="ghost"></div><div class="ghost"></div><div class="ghost"></div></div>
+</div></section>
+
+<section id="how"><div class="wrap">
+  <h2>What the robot does</h2>
+  <p class="sub">The same thing you would do with ten minutes and a burner wallet.</p>
+  <div class="how">
+    <div><p class="k">1 · OPENS IT</p><h3>The coin's own site</h3><p>The site comes from the coin's listing, never from whoever asks. It loads in a real Chromium browser and the screen is recorded from the first frame.</p></div>
+    <div><p class="k">2 · USES IT</p><h3>Clicks like a buyer</h3><p>It finds the main button, connects a wallet, fills the form and goes for the core action: launch, swap, create, play. Up to 12 steps.</p></div>
+    <div><p class="k">3 · STAMPS IT</p><h3>WORKS or NOTHING WORKS</h3><p>Dead buttons, "coming soon" and pages that only link to pump.fun get the red stamp. A product that reaches a real transaction gets the green one.</p></div>
+  </div>
+</div></section>
+
+<section id="verify"><div class="wrap">
+  <h2>Don't trust the robot. Check it.</h2>
+  <p class="sub">The stamp is an opinion. Everything under it is measured.</p>
+  <div class="rules">
+    <div><b>Every test is a public run</b><p>Tests run on GitHub Actions in the open. Each result links to its run log: every step, every click, the verdict. <a id="repo" href="#" target="_blank" rel="noopener" hidden>Read the code ↗</a></p></div>
+    <div><b>The recording is the proof</b><p>The full session is saved to IPFS and shown with the verdict. If the stamp is wrong, the video shows it.</p></div>
+    <div><b>Evidence overrules the AI</b><p>WORKS needs at least one click that measurably did something. NOTHING WORKS cannot stand next to a real transaction for an on-chain program. The counters decide, not the wording on the page.</p></div>
+    <div><b>The wallet can't lose anything</b><p>A fresh key per test, with nothing in it. It connects and signs messages. Every transaction is recorded and declined.</p></div>
+  </div>
+</div></section>
+
+<section id="coin"><div class="wrap">
+  <div class="tok">
+    <img class="pix" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAIAAAAlC+aJAAABYUlEQVR42u2aPwuCUBTFVVqFhpYgGiKCoKmtWqqlxvY+n7ujLdWSbU1CENEQQUtD4AeoQbiJrx4+fea/c6YHkt7L/XXe9foUBYJiSU3u1oPXkNZ71U7oKVreK6ABwp8yTMswLVQACSABJFDsBCTvxAfn5C2ajXrg0vV29xb9XgcVKCFCHDbkSpQ0IJRxhDjkrLY7iXHMxqNoLAGhtFUR/UGtqica0OPpYiNDAln8D0g0Tf64hR7UbbeAUE4R8hsZbYcSyXE30Y2VNXEglLudmFVv/XEVfRK0F5YcZ2qjAsVGSNR5/EgQThLJ4ccDhDKI0PF8oXXIhoTFiViK7zkUz9dggFAGEaJK+VlKVxyShccqf3snxlilqM0clTjpyRyauWIgxDop2VHkoods3UKaOBBScvKJiY5tiLZ3kVu35WIOhCAIKt1hD47bivojmrnyIESvnSGPgvgnbfHPDgGhtPUGTdyAeO6ad/UAAAAASUVORK5CYII=" alt="">
+    <div>
+      <h2>$PROVEN</h2>
+      <p>Everyone gets one test per coin per day, out of <span id="cap2">100</span> free tests a day. Hold <b id="tier">1,000,000</b> $PROVEN and you re-test any coin, any time, outside the cap. You sign a message; nothing leaves your wallet.</p>
+      <div class="acts"><a class="btn2 p" id="buy" href="#" target="_blank" rel="noopener" hidden>Buy on pump.fun</a><a class="btn2" id="chart" href="#" target="_blank" rel="noopener" hidden>Chart</a><button class="btn2" id="retest" type="button">Re-test as a holder</button></div>
+    </div>
+  </div>
+</div></section>
+
+<section id="faq"><div class="wrap">
+  <h2>Questions</h2>
+  <details><summary>My coin got NOTHING WORKS and the product is real.</summary><p>Watch the recording first: it shows exactly where the robot got stuck. Fix what a new visitor can't get past, then anyone holding 1,000,000 $PROVEN can re-test right away, and everyone can after 24 hours. Old verdicts stay visible with their date.</p></details>
+  <details><summary>What counts as WORKS?</summary><p>The robot used the core thing the site says it does, or got as far as a real transaction or signature request. Live data that answers to its input counts. A dashboard screenshot does not.</p></details>
+  <details><summary>Can a site talk the robot into a green stamp?</summary><p>Page text is treated as untrusted, and the measured evidence overrules the model: a page where no click does anything cannot be stamped WORKS, whatever it says.</p></details>
+  <details><summary>Which coins can be tested?</summary><p>Any Solana coin that lists its own website. Coins with only an X or Telegram link have no product to open, so there is nothing to test.</p></details>
+  <details><summary>Is a green stamp a reason to buy?</summary><p>No. It means the product did something when a robot used it today. It says nothing about the team, the chart or tomorrow.</p></details>
+</div></section>
+</main>
+
+<footer><div class="wrap"><span>PROVEN · a robot tried it so you don't have to</span><span><a href="#verify">how verdicts are made</a></span></div></footer>
+
+<script src="config.js"></script>
+<script>
+(()=>{
+const C=window.PROVEN_CFG||{};const API=(C.API||"").replace(/\/+$/,"");
+const $=(s,r=document)=>r.querySelector(s);const $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const IPFS=cid=>cid?`https://ipfs.filebase.io/ipfs/${cid}`:"";
+const cls=v=>v==="WORKS"?"ok":v==="SITE DOWN"?"down":"bad";
+const ago=ts=>{const s=Math.max(0,Math.round((Date.now()-Date.parse(ts))/1000));return s<60?`${s}s ago`:s<3600?`${Math.floor(s/60)}m ago`:s<86400?`${Math.floor(s/3600)}h ago`:`${Math.floor(s/86400)}d ago`};
+const host=u=>{try{return new URL(u).host.replace(/^www\./,"")}catch{return""}};
+async function api(path,opt){const r=await fetch(API+path,opt);let j=null;try{j=await r.json()}catch{}if(!r.ok)throw Object.assign(new Error(j?.error||`error ${r.status}`),{status:r.status,body:j});return j}
+
+/* config → links */
+const ca=C.CA||"";
+if(ca){const b=$("#ca");b.hidden=false;$("#cat").textContent=ca;b.onclick=async()=>{try{await navigator.clipboard.writeText(ca);$("#cac").textContent="copied";setTimeout(()=>$("#cac").textContent="copy",1200)}catch{const r=document.createRange();r.selectNodeContents($("#cat"));const s=getSelection();s.removeAllRanges();s.addRange(r)}}}
+if(C.X){$("#x").href=C.X;$("#x").hidden=false}
+const buy=C.BUY||(ca?`https://pump.fun/coin/${ca}`:""),chart=C.CHART||(ca?`https://gmgn.ai/sol/token/${ca}`:"");
+if(buy){$("#buy").href=buy;$("#buy").hidden=false}if(chart){$("#chart").href=chart;$("#chart").hidden=false}
+
+/* the visor stage: one deterministic timeline, used by the intro and by the idle face */
+const CHECK='<svg viewBox="0 0 14 10" shape-rendering="crispEdges" aria-hidden="true"><g fill="#39ff3a"><rect x="0" y="4" width="2" height="2"/><rect x="2" y="4" width="2" height="2"/><rect x="2" y="6" width="2" height="2"/><rect x="4" y="6" width="2" height="2"/><rect x="4" y="8" width="2" height="2"/><rect x="6" y="6" width="2" height="2" fill="#2cbe3a"/><rect x="6" y="4" width="2" height="2"/><rect x="8" y="4" width="2" height="2" fill="#2cbe3a"/><rect x="8" y="2" width="2" height="2"/><rect x="10" y="2" width="2" height="2" fill="#2cbe3a"/><rect x="10" y="0" width="2" height="2"/></g></svg>';
+function buildStage(el){el.innerHTML=`<div class="pg"><i class="t1"></i><i class="t2"></i><i class="t3"></i><i class="btn"></i></div><div class="cur"></div><div class="stamp bad">NOTHING WORKS</div><div class="face">${CHECK}</div>`;return{pg:$(".pg",el),btn:$(".btn",el),cur:$(".cur",el),stamp:$(".stamp",el),face:$(".face",el)}}
+const E=x=>x<=0?0:x>=1?1:1-Math.pow(2,-10*x);const seg=(t,a,b)=>Math.min(1,Math.max(0,(t-a)/(b-a)));
+/* beats: 0–.5 a page appears · .5–1.35 the cursor goes to its one button and clicks twice, nothing happens · 1.35–2.0 the stamp lands */
+function stageFrame(p,t){
+  p.face.style.opacity=t<0.02?1:0;
+  p.pg.style.opacity=E(seg(t,.05,.45));
+  const mv=E(seg(t,.5,.95));p.cur.style.opacity=t>.45&&t<2.6?1:0;
+  p.cur.style.left=(78-57*mv)+"cqw";p.cur.style.top=(22+31*mv)+"cqh";
+  const c1=t>1.0&&t<1.12,c2=t>1.2&&t<1.32;p.cur.style.transform=`scale(${c1||c2?1.7:1})`;
+  p.btn.className="btn"+(t>1.0?" dead":"");
+  const s=seg(t,1.4,1.62);p.stamp.style.opacity=s>0?1:0;p.stamp.style.transform=`translate(-50%,-50%) rotate(-7deg) scale(${3-2*E(s)})`;
+}
+const stage=buildStage($("#stage"));
+const reduced=matchMedia("(prefers-reduced-motion: reduce)").matches;
+function showFace(){stage.pg.style.opacity=0;stage.cur.style.opacity=0;stage.stamp.style.opacity=0;stage.face.style.opacity=1}
+showFace();
+
+/* intro */
+function reveal(){document.body.classList.remove("pre")}
+(function intro(){
+  let seen=false;try{seen=sessionStorage.getItem("pv_intro")==="1"}catch{}
+  const el=$("#intro");
+  if(reduced||seen){return}
+  document.body.classList.add("pre");el.hidden=false;
+  const ip=buildStage($("#istage"));const ib=$(".ibot",el);const target=$("#bot");
+  let t0=null,done=false,raf=0;
+  const END=2.05,FLY=.55;
+  function finish(){if(done)return;done=true;cancelAnimationFrame(raf);el.hidden=true;try{sessionStorage.setItem("pv_intro","1")}catch{}reveal()}
+  function frame(now){
+    if(t0===null)t0=now;const t=(now-t0)/1000;
+    stageFrame(ip,Math.min(t,END));
+    if(t>END){
+      const k=E(seg(t,END,END+FLY));const a=ib.getBoundingClientRect(),b=target.getBoundingClientRect();
+      const base=ib.offsetWidth;const sc=1+(b.width/base-1)*k;
+      const ax=innerWidth/2,ay=innerHeight/2;const bx=b.left+b.width/2,by=b.top+b.height/2;
+      ib.style.transform=`translate(${(bx-ax)*k}px,${(by-ay+ (0.023*base*(1-sc)))*k}px) scale(${sc})`;
+      el.style.background=`rgba(0,0,0,${1-k})`;
+      if(k>.25)reveal();
+      if(t>END+FLY){finish();return}
+    }
+    raf=requestAnimationFrame(frame);
+  }
+  const start=()=>{raf=requestAnimationFrame(frame)};
+  ["pointerdown","keydown","wheel","touchstart"].forEach(ev=>addEventListener(ev,finish,{once:true,passive:true}));
+  if(document.fonts&&document.fonts.ready){let s=false;const go=()=>{if(!s){s=true;start()}};document.fonts.ready.then(go);setTimeout(go,600)}else start();
+  window.__pvIntro={frame:t=>{stageFrame(ip,Math.min(t,END))}};
+})();
+
+/* feed: totals + wall */
+let FEED=null;
+function tile(t){
+  const b=document.createElement("button");b.type="button";b.className="tile";
+  b.innerHTML=`<div class="th"${t.poster?` style="background-image:url('${IPFS(t.poster)}')"`:""}><span class="tg ${cls(t.verdict)}">${esc(t.verdict)}</span></div><div class="tb"><div class="tn">${esc(t.name||t.symbol||"coin")} <span class="mono" style="font-size:12px;color:var(--mut)">$${esc(t.symbol)}</span></div><div class="ts">${esc(host(t.site))} · ${esc(ago(t.finished_at))}</div></div>`;
+  b.onclick=()=>open(t.id,true);return b;
+}
+async function loadFeed(){
+  try{
+    const f=await api("/api/feed");FEED=f;
+    $$("[data-s]").forEach(e=>e.textContent=Number(f.totals[e.dataset.s]||0).toLocaleString("en-US"));
+    $("#ch").textContent=f.cache_hours;$("#cap2").textContent=f.daily_cap;$("#tier").textContent=Number(f.holder_tier).toLocaleString("en-US");
+    $("#capleft").textContent=f.open?Math.max(0,f.daily_cap-f.today):"0";
+    if(f.repo){$("#repo").href=`https://github.com/${f.repo}`;$("#repo").hidden=false}
+    const w=$("#wall");w.innerHTML="";
+    if(!f.recent.length){w.innerHTML=`<div class="empty">${f.open?"No tests yet. Paste a CA and be the first.":"The test bench is not switched on yet."}</div>`}
+    else f.recent.forEach(t=>w.appendChild(tile(t)));
+    if(!f.open&&!$("#msg").textContent){$("#msg").textContent="The test bench is not switched on yet."}
+    if(f.recent[0]&&!CUR)visorPoster(f.recent[0]);
+  }catch{ const w=$("#wall");if(w.querySelector(".ghost"))w.innerHTML='<div class="empty">The test bench is not switched on yet.</div>';$$("[data-s]").forEach(e=>{if(e.querySelector(".sk"))e.textContent="–"});$("#capleft").textContent="0" }
+}
+function visorPoster(t){
+  if(!t.poster)return;const v=$("#visor");$$(".poster",v).forEach(n=>n.remove());
+  const i=new Image();i.className="poster";i.alt="";i.onload=()=>{v.insertBefore(i,$("#stage"));stage.face.style.opacity=0;stage.stamp.className="stamp "+cls(t.verdict);stage.stamp.textContent=t.verdict;stage.stamp.style.opacity=1;stage.stamp.style.transform="translate(-50%,-50%) rotate(-7deg) scale(1)";$("#vlab").textContent="last test · $"+(t.symbol||"")};i.src=IPFS(t.poster);
+}
+
+/* one test: ask, poll, show */
+let CUR=null,poll=0;
+function setBot(state){const b=$("#bot");b.classList.toggle("busy",state==="busy");b.classList.toggle("fail",state==="fail")}
+function render(t){
+  CUR=t;$("#result").hidden=false;
+  $("#rname").textContent=(t.name||"coin")+(t.symbol?` $${t.symbol}`:"");const s=$("#rsite");s.textContent=host(t.site);s.href=t.site;
+  const v=$("#rverdict"),m=$("#media");
+  if(t.status==="done"){
+    v.className="big "+cls(t.verdict);v.textContent=t.verdict;
+    $("#rsum").textContent=t.summary||"";
+    $("#rev").innerHTML=(t.lines||[]).map(l=>`<li>${esc(l)}</li>`).join("");
+    $("#rsteps").innerHTML=(t.steps||[]).filter(x=>x.action!=="done").map(x=>`<li class="${x.dead?"d":x.wallet?"w":""}">${x.n}. ${esc(x.action)}${x.target?" "+esc(x.target):""}${x.typed?` = "${esc(x.typed)}"`:""} → ${x.dead?"nothing happened":x.left?"left the site":x.wallet?"wallet called":"ok"}</li>`).join("");
+    m.innerHTML=t.video?`<video controls playsinline muted autoplay loop ${t.poster?`poster="${IPFS(t.poster)}"`:""} src="${IPFS(t.video)}"></video>`:t.poster?`<img alt="Last screen of the test" src="${IPFS(t.poster)}">`:`<div class="wait">No recording was saved for this test.</div>`;
+    const text=`${t.verdict}: PROVEN's robot just tried $${t.symbol||""}'s product.\n\n${t.summary||""}`;
+    $("#racts").innerHTML=`<a class="btn2 p" target="_blank" rel="noopener" href="https://x.com/intent/tweet?text=${encodeURIComponent(text)}${C.SITE?`&url=${encodeURIComponent(C.SITE+"#t-"+t.id)}`:""}">Post to X</a>${t.run_url?`<a class="btn2" target="_blank" rel="noopener" href="${esc(t.run_url)}">Run log ↗</a>`:""}${t.video?`<a class="btn2" target="_blank" rel="noopener" href="${IPFS(t.video)}">Video file ↗</a>`:""}<span class="mono" style="align-self:center;font-size:12px;color:var(--dim)">tested ${esc(ago(t.finished_at))}${t.overruled?" · model overruled by evidence":""}</span>`;
+    setBot(t.verdict==="WORKS"?"":"fail");visorPoster(t);
+  }else if(t.status==="failed"){
+    v.className="big run";v.textContent="TEST FAILED";$("#rsum").textContent="The test did not finish. Nothing was stamped. Try again in a minute.";$("#rev").innerHTML="";$("#rsteps").innerHTML="";m.innerHTML=`<div class="wait">No result.</div>`;$("#racts").innerHTML="";setBot("");
+  }else{
+    v.className="big run";v.textContent=t.status==="running"?"TESTING…":"IN LINE…";
+    $("#rsum").textContent=t.status==="running"?"The robot is on the site right now.":"Waiting for a free robot.";$("#rev").innerHTML="";$("#rsteps").innerHTML="";
+    m.innerHTML=`<div class="wait">Recording in progress.<br>The video appears here when the test ends.</div>`;
+    $("#racts").innerHTML=t.run_url?`<a class="btn2" target="_blank" rel="noopener" href="${esc(t.run_url)}">Watch the run live ↗</a>`:"";
+    setBot("busy");$("#vlab").textContent="testing · $"+(t.symbol||"");
+  }
+}
+async function open(id,scroll){
+  clearTimeout(poll);
+  try{const {test}=await api(`/api/test?id=${id}`);render(test);if(scroll)$("#result").scrollIntoView({behavior:reduced?"auto":"smooth",block:"start"});try{history.replaceState(null,"","#t-"+id)}catch{}
+    if(test.status==="queued"||test.status==="running")poll=setTimeout(()=>open(id,false),5000);else loadFeed();
+  }catch(e){$("#msg").className="msg err";$("#msg").textContent=e.message}
+}
+async function ask(body){
+  const go=$("#go"),msg=$("#msg");go.disabled=true;msg.className="msg";msg.textContent="Looking up the coin…";
+  try{const r=await api("/api/test",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(body)});
+    msg.className="msg okc";msg.textContent=r.cached?(r.test.status==="done"?"Already tested today. Here is the verdict.":"Already being tested."):"Test started.";
+    render(r.test);$("#result").scrollIntoView({behavior:reduced?"auto":"smooth",block:"start"});try{history.replaceState(null,"","#t-"+r.test.id)}catch{}
+    if(r.test.status!=="done"&&r.test.status!=="failed")poll=setTimeout(()=>open(r.test.id,false),5000);
+  }catch(e){msg.className="msg err";msg.textContent=e.status===503?"The test bench is not switched on yet.":e.message==="Failed to fetch"?"Can't reach the test bench right now.":e.message}
+  finally{go.disabled=false}
+}
+$("#f").addEventListener("submit",ev=>{ev.preventDefault();const m=$("#mint").value.trim();if(!/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(m)){$("#msg").className="msg err";$("#msg").textContent="That is not a Solana contract address.";return}ask({mint:m})});
+
+/* holder re-test: sign a message with Phantom, nothing is sent */
+const B58="123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
+const b58=bytes=>{let d=[0];for(const b of bytes){let c=b;for(let j=0;j<d.length;j++){c+=d[j]<<8;d[j]=c%58;c=(c/58)|0}while(c){d.push(c%58);c=(c/58)|0}}let s="";for(const b of bytes){if(b===0)s+="1";else break}for(let i=d.length-1;i>=0;i--)s+=B58[d[i]];return s};
+$("#retest").onclick=async()=>{
+  const msg=$("#msg");const m=(CUR&&CUR.mint)||$("#mint").value.trim();
+  const say=(t,c)=>{msg.className="msg "+(c||"");msg.textContent=t;$("#top").scrollIntoView({behavior:reduced?"auto":"smooth"})};
+  if(!/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(m))return say("Paste the coin's contract address first.","err");
+  const p=window.phantom?.solana||window.solana;if(!p)return say("Open this page in a browser with Phantom to sign as a holder.","err");
+  try{const {publicKey}=await p.connect();const ts=Math.floor(Date.now()/1000);const {signature}=await p.signMessage(new TextEncoder().encode(`PROVEN retest ${m} ${ts}`),"utf8");
+    await ask({mint:m,wallet:publicKey.toBase58(),signature:b58(signature),ts});
+  }catch(e){say(e.message||"Signing was cancelled.","err")}
+};
+
+loadFeed();setInterval(loadFeed,20000);
+const h=/^#t-(\d+)$/.exec(location.hash);if(h)open(Number(h[1]),false);
+})();
+</script>
+
+</body>
+</html>

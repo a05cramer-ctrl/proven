@@ -1,0 +1,7 @@
+node_modules
+.env*
+launch/
+art/
+art2/
+site/dist/proven-preview.html
+*.tmp.mjs
