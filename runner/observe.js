@@ -22,8 +22,7 @@ export function observe(maxEls) {
     els.push({ i, tag, type: el.getAttribute('type') || '', text, href, disabled: !!el.disabled || el.getAttribute('aria-disabled') === 'true', inView: r.top >= 0 && r.bottom <= innerHeight, dialog: inDialog(el) });
   }
   const text = clean(document.body ? document.body.innerText : '').slice(0, 2600);
-  // A cheap fingerprint of the markup (without our own cursor and tags): catches a toggle that only changes a class or a style.
-  const cur = document.getElementById('__pv_cur');
-  const sig = (document.body ? document.body.innerHTML.replace(/ data-pv="\d+"/g, '').length : 0) - (cur ? cur.outerHTML.length : 0);
+  // A cheap fingerprint of the markup (without our own tags; the cursor lives outside <body>): catches a toggle that only changes a class or a style.
+  const sig = document.body ? document.body.innerHTML.replace(/ data-pv="\d+"/g, '').length : 0;
   return { sig, url: location.href, title: document.title.slice(0, 120), text, textLen: (document.body ? document.body.innerText : '').length, els, scrollY: Math.round(scrollY), pageH: Math.round(document.documentElement.scrollHeight), viewH: innerHeight };
 }
