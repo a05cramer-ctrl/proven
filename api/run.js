@@ -17,7 +17,8 @@ export function pickModel(req) {
   const base = key ? 'https://openrouter.ai/api/v1' : 'https://ai-gateway.vercel.sh/v1';
   const fns = names.map((model) => chatModel({ apiKey: key || token, model, base }));
   let at = 0; // once a model fails, the rest of the test uses the next one
-  const fn = async (input) => { for (;;) { try { return await fns[at](input); } catch (e) { if (at >= fns.length - 1) throw e; at++; } } };
+  const errs = [];
+  const fn = async (input) => { for (;;) { try { return await fns[at](input); } catch (e) { errs.push(`${names[at]}: ${String(e?.message).slice(0, 90)}`); if (at >= fns.length - 1) throw new Error(errs.slice(-2).join(' / ')); at++; } } };
   return { get name() { return names[at]; }, fn };
 }
 

@@ -78,7 +78,7 @@ export async function runTest(browser, { url, model, maxSteps = 12, budgetMs = 1
       let act = null;
       let modelFailed = false;
       try { act = parseAction(await model({ system: SYSTEM, user: userMessage(obs, last, lastStep ? maxSteps : n, maxSteps, history), jpegB64: jpeg, obs, signals, steps })); } catch (e) { modelFailed = true; modelErrors++; last = `model error: ${String(e.message).slice(0, 80)}`; }
-      if (modelFailed && modelErrors >= 2) throw new Error('the model stopped answering');
+      if (modelFailed && modelErrors >= 2) throw new Error(`the model stopped answering (${last.slice(13, 150)})`);
       if (!act) { if (lastStep) break; act = { action: 'wait', note: 'no valid action', target: null, text: '' }; }
       if (lastStep && act.action !== 'done') act = { ...act, action: 'done' };
       const step = { n, action: act.action, note: act.note, target: null, effect: null };
