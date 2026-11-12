@@ -90,7 +90,7 @@ export async function runTest(browser, { url, model, maxSteps = 12, budgetMs = 1
       }
       if (act.action === 'done') { modelOut = { verdict: act.verdict, summary: act.summary, findings: act.findings }; steps.push(step); break; }
       counters = { requests: 0, wallet: 0, popup: null };
-      const before = { url: page.url(), len: obs.textLen, text: obs.text };
+      const before = { url: page.url(), len: obs.textLen, text: obs.text, sig: obs.sig };
       try {
         if (act.action === 'click' || act.action === 'type') {
           const el = obs.els.find((e) => e.i === act.target);
@@ -111,7 +111,7 @@ export async function runTest(browser, { url, model, maxSteps = 12, budgetMs = 1
       await sleep(1400);
       obs = await snap();
       const navigated = obs.url.split('#')[0] !== before.url.split('#')[0];
-      const domChanged = navigated || Math.abs(obs.textLen - before.len) > 12 || obs.text !== before.text;
+      const domChanged = navigated || Math.abs(obs.textLen - before.len) > 12 || obs.text !== before.text || (before.sig != null && obs.sig != null && obs.sig !== before.sig);
       step.effect = { navigated, domChanged: act.action === 'scroll' ? false : (domChanged || (act.action === 'type' && !step.error)), requests: counters.requests, wallet: counters.wallet, popup: counters.popup };
       const leftHost = (() => { try { return new URL(obs.url).host.replace(/^www\./, ''); } catch { return siteHost; } })();
       if (navigated && leftHost !== siteHost && !leftHost.endsWith('.' + siteHost)) { step.effect.left = leftHost; step.effect.popup = step.effect.popup || obs.url; step.effect.navigated = false; step.effect.domChanged = false; await page.goBack({ timeout: 8000 }).catch(() => {}); await sleep(900); obs = await snap(); }

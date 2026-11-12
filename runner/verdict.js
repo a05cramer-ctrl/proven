@@ -25,7 +25,7 @@ export function finalVerdict(modelVerdict, ev, { reachable = true } = {}) {
   if (!modelVerdict) return { verdict: ev.realPrograms.length > 0 || (ev.effective >= 3 && ev.apiCalls >= 3) ? 'WORKS' : 'NOTHING WORKS', overruled: false, byEvidence: true };
   let v = VERDICTS.includes(modelVerdict) && modelVerdict !== 'SITE DOWN' ? modelVerdict : 'NOTHING WORKS';
   if (v === 'NOTHING WORKS' && ev.realPrograms.length > 0) return { verdict: 'WORKS', overruled: true, why: 'the site built a real transaction for an on-chain program' };
-  if (v === 'NOTHING WORKS' && ev.effective >= 3 && ev.dead <= 1 && ev.effective >= ev.dead * 3 && (ev.apiCalls >= 5 || ev.walletConnected)) return { verdict: 'WORKS', overruled: true, why: 'the controls answered and live data loaded behind them' };
+  if (v === 'NOTHING WORKS' && ev.effective >= 3 && ev.effective >= ev.dead * 2 && (ev.apiCalls >= 5 || ev.walletConnected || ev.messagesSigned > 0)) return { verdict: 'WORKS', overruled: true, why: ev.walletConnected ? 'the controls answered and the wallet connected' : 'the controls answered and live data loaded behind them' };
   if (v === 'WORKS' && ev.effective === 0 && ev.txBuilt === 0 && ev.messagesSigned === 0) return { verdict: 'NOTHING WORKS', overruled: true, why: 'no click did anything measurable' };
   return { verdict: v };
 }

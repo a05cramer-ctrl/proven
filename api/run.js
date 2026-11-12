@@ -57,7 +57,7 @@ export default route(['POST'], async (req, res) => {
       url: t.site, model: model.fn, maxSteps: Number(env('PROVEN_STEPS', '10')), budgetMs: 170_000, frames: true,
       onStep: async (_step, jpg, steps) => { try { await db.progress(t.id, steps.map(publicStep), n, jpg); if (jpg) n++; } catch (e) { console.error('[progress]', e?.message); } },
     });
-    await db.finish(t.id, { verdict: r.verdict, overruled: r.overruled, summary: r.overruled ? `Overruled by the evidence: ${r.why}.` : r.summary, findings: r.findings, lines: r.lines, steps: r.steps, evidence: r.evidence, model: model.name, ms: r.ms });
+    await db.finish(t.id, { verdict: r.verdict, overruled: r.overruled, summary: r.overruled ? (r.verdict === 'WORKS' ? `It works: ${r.why}.` : `Nothing here works: ${r.why}.`) : r.summary, findings: r.findings, lines: r.lines, steps: r.steps, evidence: r.evidence, model: model.name, ms: r.ms });
     db.prune().catch(() => {});
     send(res, 200, { ok: true, verdict: r.verdict });
   } catch (e) {
