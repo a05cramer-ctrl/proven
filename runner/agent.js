@@ -54,7 +54,7 @@ export async function runTest(browser, { url, model, maxSteps = 12, budgetMs = 1
   page.on('requestfailed', (req) => { if (isData(req)) signals.failed++; });
   page.on('response', (res) => { if (res.status() >= 400 && isData(res.request())) signals.failed++; });
 
-  const steps = []; const history = []; let modelErrors = 0;
+  const steps = []; const history = []; let modelErrors = 0; let pushbacks = 0;
   /** One JPEG of the screen, as it looks right now (the green cursor is part of the page). */
   const frame = async () => { if (!frames) return null; try { return (await page.screenshot({ type: 'jpeg', quality: 48, scale: 'css' })).toString('base64'); } catch { return null; } };
   const started = Date.now();
@@ -82,6 +82,12 @@ export async function runTest(browser, { url, model, maxSteps = 12, budgetMs = 1
       if (!act) { if (lastStep) break; act = { action: 'wait', note: 'no valid action', target: null, text: '' }; }
       if (lastStep && act.action !== 'done') act = { ...act, action: 'done' };
       const step = { n, action: act.action, note: act.note, target: null, effect: null };
+      // A red stamp has to be earned: not before the robot has really tried the page.
+      if (act.action === 'done' && act.verdict !== 'WORKS' && !lastStep && pushbacks < 2 && n <= maxSteps - 3) {
+        const tried = steps.filter((x) => x.action === 'click' || x.action === 'type').length;
+        const untried = obs.els.filter((e) => !e.disabled && (e.tag !== 'a' || (e.href && !e.href.includes('.')))).length;
+        if (tried < 4 && untried > 0) { pushbacks++; last = `verdict not accepted yet: you have only tried ${tried} control(s). Try more of the page (${untried} controls are listed) before deciding.`; history.push(`${n}. tried to finish early → ${last}`); continue; }
+      }
       if (act.action === 'done') { modelOut = { verdict: act.verdict, summary: act.summary, findings: act.findings }; steps.push(step); break; }
       counters = { requests: 0, wallet: 0, popup: null };
       const before = { url: page.url(), len: obs.textLen, text: obs.text };

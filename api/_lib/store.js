@@ -2,7 +2,7 @@
 import { env, CACHE_HOURS, STALE_MINUTES } from './util.js';
 
 /** Bumped when the robot's rules change: verdicts made under older rules leave the wall and the cache. */
-export const RULES = 3;
+export const RULES = 4;
 
 export const SCHEMA = [
   `CREATE TABLE IF NOT EXISTS tests (id BIGSERIAL PRIMARY KEY, mint TEXT NOT NULL, name TEXT NOT NULL DEFAULT '', symbol TEXT NOT NULL DEFAULT '', icon TEXT, site TEXT NOT NULL, status TEXT NOT NULL DEFAULT 'queued', verdict TEXT, overruled BOOLEAN NOT NULL DEFAULT false, summary TEXT, findings JSONB, lines JSONB, steps JSONB, evidence JSONB, video TEXT, poster TEXT, run_url TEXT, model TEXT, holder BOOLEAN NOT NULL DEFAULT false, error TEXT, ms INT, created_at TIMESTAMPTZ NOT NULL DEFAULT now(), started_at TIMESTAMPTZ, finished_at TIMESTAMPTZ)`,
@@ -48,6 +48,9 @@ export function pgStore(driver) {
         [id, r.verdict, !!r.overruled, r.summary || '', J(r.findings || []), J(r.lines || []), J(r.steps || []), J(r.evidence || {}), r.video || null, r.poster || null, r.model || null, r.ms || null, r.run_url || null]))[0]);
     },
     async fail(id, error) { await q(`UPDATE tests SET status = 'failed', error = $2, finished_at = now() WHERE id = $1 AND status IN ('queued','running')`, [id, String(error).slice(0, 300)]); },
+    async running() { return Number((await q(`SELECT count(*)::int AS n FROM tests WHERE status = 'running'`))[0].n); },
+    async nextQueued() { return fix((await q(`SELECT * FROM tests WHERE status = 'queued' ORDER BY id LIMIT 1`))[0]); },
+    async ahead(id) { return Number((await q(`SELECT count(*)::int AS n FROM tests WHERE status IN ('queued','running') AND id < $1`, [id]))[0].n); },
     async recent(limit = 24) { return (await q(`SELECT id, mint, name, symbol, icon, site, verdict, summary, frames, finished_at FROM tests WHERE status = 'done' AND rules = $2 ORDER BY id DESC LIMIT $1`, [limit, RULES])).map(fix); },
     async totals() {
       const r = (await q(`SELECT count(*) FILTER (WHERE status = 'done')::int AS tests, count(*) FILTER (WHERE verdict = 'WORKS')::int AS works, count(*) FILTER (WHERE verdict = 'NOTHING WORKS')::int AS nothing, count(*) FILTER (WHERE verdict = 'SITE DOWN')::int AS down, count(*) FILTER (WHERE status IN ('queued','running'))::int AS in_flight, count(DISTINCT mint) FILTER (WHERE status = 'done')::int AS coins FROM tests WHERE rules = $1`, [RULES]))[0];

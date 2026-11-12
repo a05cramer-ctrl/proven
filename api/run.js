@@ -4,17 +4,21 @@ import chromium from '@sparticuz/chromium';
 import { chromium as playwright } from 'playwright-core';
 import { route, send, readJson, HttpError, env } from './_lib/util.js';
 import { store } from './_lib/store.js';
-import { runKey, cleanSite } from './_lib/coin.js';
+import { runKey, cleanSite, dispatch } from './_lib/coin.js';
 import { runTest, publicStep } from '../runner/agent.js';
 import { chatModel } from '../runner/model.js';
 
 /** Which model drives: the project's Vercel AI Gateway (no key to set up), or OpenRouter when a key is present. */
+export const MODELS = ['anthropic/claude-haiku-5.5', 'google/gemini-3.8-flash'];
 export function pickModel(req) {
-  if (env('OPENROUTER_API_KEY')) return { name: env('PROVEN_MODEL', 'google/gemini-2.5-flash'), fn: chatModel({ apiKey: env('OPENROUTER_API_KEY'), model: env('PROVEN_MODEL', 'google/gemini-2.5-flash'), base: 'https://openrouter.ai/api/v1' }) };
-  const token = env('AI_GATEWAY_API_KEY') || req.headers['x-vercel-oidc-token'] || env('VERCEL_OIDC_TOKEN');
-  if (!token) return null;
-  const name = env('PROVEN_MODEL', 'google/gemini-2.5-flash');
-  return { name, fn: chatModel({ apiKey: token, model: name, base: 'https://ai-gateway.vercel.sh/v1' }) };
+  const names = env('PROVEN_MODEL') ? [env('PROVEN_MODEL'), ...MODELS] : MODELS;
+  const key = env('OPENROUTER_API_KEY'); const token = env('AI_GATEWAY_API_KEY') || req.headers['x-vercel-oidc-token'] || env('VERCEL_OIDC_TOKEN');
+  if (!key && !token) return null;
+  const base = key ? 'https://openrouter.ai/api/v1' : 'https://ai-gateway.vercel.sh/v1';
+  const fns = names.map((model) => chatModel({ apiKey: key || token, model, base }));
+  let at = 0; // once a model fails, the rest of the test uses the next one
+  const fn = async (input) => { for (;;) { try { return await fns[at](input); } catch (e) { if (at >= fns.length - 1) throw e; at++; } } };
+  return { get name() { return names[at]; }, fn };
 }
 
 // Two tests can land on the same warm instance. Chromium is unpacked to /tmp once, and launches go one at a time,
@@ -55,5 +59,8 @@ export default route(['POST'], async (req, res) => {
     console.error('[run]', e);
     await db.fail(t.id, String(e?.message || e));
     send(res, 200, { ok: false, error: String(e?.message || e).slice(0, 200) });
-  } finally { if (browser) await browser.close().catch(() => {}); }
+  } finally {
+    if (browser) await browser.close().catch(() => {});
+    try { const next = await db.nextQueued(); if (next && (await db.running()) < 2) await dispatch(next.id, req.headers.host); } catch { /* the watcher's poll starts it */ }
+  }
 });

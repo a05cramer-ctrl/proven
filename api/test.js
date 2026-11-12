@@ -2,6 +2,7 @@
 // POST /api/test { mint, wallet, signature, ts } a holder of 1,000,000 $PROVEN re-tests now, outside the cap
 // GET  /api/test?id=  |  ?mint=                 the test and its result
 import { route, send, readJson, query, HttpError, isPubkey, env, nowS, DAILY_CAP_DEFAULT } from './_lib/util.js';
+export const MAX_AT_ONCE = 2;
 import { store } from './_lib/store.js';
 import { lookup, holderOk, dispatch } from './_lib/coin.js';
 
@@ -15,7 +16,13 @@ export default route(['GET', 'POST'], async (req, res) => {
     const q = query(req);
     const t = q.id ? await db.get(Number(q.id)) : isPubkey(q.mint) ? (await db.current(q.mint)) || (await db.latestDone(q.mint)) : null;
     if (!t) throw new HttpError(404, 'no test for that yet');
-    return send(res, 200, { test: view(t) });
+    const out = view(t);
+    if (t.status === 'queued') {
+      out.ahead = await db.ahead(t.id);
+      // a queued test whose kick-off was lost (or that reached the front) is started by whoever is watching it
+      if ((await db.running()) < MAX_AT_ONCE && (await db.nextQueued())?.id === t.id) await dispatch(t.id, req.headers.host);
+    }
+    return send(res, 200, { test: out });
   }
   const b = await readJson(req);
   const mint = String(b.mint || '').trim();
@@ -30,6 +37,7 @@ export default route(['GET', 'POST'], async (req, res) => {
   const cap = Number(env('PROVEN_DAILY_CAP', String(DAILY_CAP_DEFAULT)));
   if (!holder && await db.countToday() >= cap) throw new HttpError(429, `Today's ${cap} free tests are used. Holders of 1,000,000 $PROVEN can still test.`);
   const t = await db.add({ mint, ...coin, holder });
-  const started = await dispatch(t.id, req.headers.host);
+  // Two robots at a time; the rest wait in line and each finished test starts the next one.
+  const started = (await db.running()) < MAX_AT_ONCE ? await dispatch(t.id, req.headers.host) : false;
   send(res, 200, { test: view(t), started });
 });
