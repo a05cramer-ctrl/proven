@@ -37,10 +37,13 @@ export async function lookup(mint) {
   return { name: name.slice(0, 60), symbol: symbol.slice(0, 20), icon, site, found: !!(name || symbol) };
 }
 
+/** $PROVEN on pump.fun (public; PROVEN_MINT in env overrides it). */
+export const MINT = 'CFTBXiuRa7nKS7xGtBAJg8LWooBnzj7kJ1DVmfaSpump';
+
 /** "PROVEN retest <mint> <unix>" signed by a wallet holding 1,000,000 $PROVEN, at most 5 minutes old. */
 export const retestMessage = (mint, ts) => `PROVEN retest ${mint} ${ts}`;
 export async function holderOk({ wallet, signature, ts, mint }, now) {
-  const pm = env('PROVEN_MINT');
+  const pm = env('PROVEN_MINT', MINT);
   if (!isPubkey(pm) || !isPubkey(wallet) || !signature || !(Math.abs(now - Number(ts)) < 300)) return false;
   try { if (!nacl.sign.detached.verify(new TextEncoder().encode(retestMessage(mint, ts)), bs58.decode(signature), bs58.decode(wallet))) return false; } catch { return false; }
   try {

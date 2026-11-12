@@ -1,1 +1,1 @@
-window.PROVEN_CFG={NAME:"PROVEN",TICKER:"PROVEN",CA:"",CHAIN:"solana",PAD:"pump.fun",X:"",BUY:"",CHART:"",SITE:"https://proven-amber.vercel.app",API:""};
+window.PROVEN_CFG={NAME:"PROVEN",TICKER:"PROVEN",CA:"CFTBXiuRa7nKS7xGtBAJg8LWooBnzj7kJ1DVmfaSpump",CHAIN:"solana",PAD:"pump.fun",X:"https://x.com/provenbot",BUY:"https://pump.fun/coin/CFTBXiuRa7nKS7xGtBAJg8LWooBnzj7kJ1DVmfaSpump",CHART:"https://gmgn.ai/sol/token/CFTBXiuRa7nKS7xGtBAJg8LWooBnzj7kJ1DVmfaSpump",SITE:"https://provenbot.fun",API:""};
