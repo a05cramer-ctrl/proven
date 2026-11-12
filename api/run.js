@@ -17,6 +17,19 @@ export function pickModel(req) {
   return { name, fn: chatModel({ apiKey: token, model: name, base: 'https://ai-gateway.vercel.sh/v1' }) };
 }
 
+// Two tests can land on the same warm instance. Chromium is unpacked to /tmp once, and launches go one at a time,
+// so a second test never starts a binary that is still being written.
+let line = Promise.resolve();
+async function launchOnce() {
+  let lastErr = null;
+  for (let i = 0; i < 4; i++) {
+    try { return await playwright.launch({ args: chromium.args, executablePath: await chromium.executablePath(), headless: true }); }
+    catch (e) { lastErr = e; if (!/ETXTBSY|EAGAIN|ENOENT/.test(String(e?.message))) throw e; await new Promise((r) => setTimeout(r, 1200 * (i + 1))); }
+  }
+  throw lastErr;
+}
+function launch() { const p = line.then(launchOnce, launchOnce); line = p.catch(() => {}); return p; }
+
 export default route(['POST'], async (req, res) => {
   if ((req.headers['x-proven-key'] || '') !== runKey()) throw new HttpError(401, 'unauthorized');
   const db = store();
@@ -29,7 +42,7 @@ export default route(['POST'], async (req, res) => {
   if (!model) { await db.fail(t.id, 'no model available'); throw new HttpError(503, 'no model available'); }
   let browser = null;
   try {
-    browser = await playwright.launch({ args: chromium.args, executablePath: await chromium.executablePath(), headless: true });
+    browser = await launch();
     let n = 0;
     const r = await runTest(browser, {
       url: t.site, model: model.fn, maxSteps: Number(env('PROVEN_STEPS', '10')), budgetMs: 170_000, frames: true,
