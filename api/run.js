@@ -66,6 +66,6 @@ export default route(['POST'], async (req, res) => {
     send(res, 200, { ok: false, error: String(e?.message || e).slice(0, 200) });
   } finally {
     if (browser) await browser.close().catch(() => {});
-    try { const next = await db.nextQueued(); if (next && (await db.running()) < 2) await dispatch(next.id, req.headers.host); } catch { /* the watcher's poll starts it */ }
+    try { const next = await db.nextQueued(); if (next && (await db.running()) < 1) await dispatch(next.id, req.headers.host); } catch { /* the watcher's poll starts it */ }
   }
 });

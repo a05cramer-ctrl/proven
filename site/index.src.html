@@ -427,8 +427,8 @@ function render(t){
     v.className="big run";v.textContent="NO VERDICT";$("#rsum").textContent="The robot lost the connection before it could finish. Run it again.";$("#rev").innerHTML="";$("#media").innerHTML=`<div class="wait">No verdict for this run.</div>`;
     $("#racts").innerHTML=`<button class="btn2 p" type="button" id="again">Test again</button>`;$("#again").onclick=()=>ask({mint:t.mint});setBot("");
   }else{
-    v.className="big run";v.textContent=t.status==="running"?"TESTING…":t.ahead>1?"IN LINE…":"STARTING…";
-    $("#rsum").textContent=t.status==="running"?"The robot is on the site right now. Every step shows up here as it happens.":t.ahead>1?`${t.ahead} tests ahead of this one. It starts by itself.`:"Waking the robot up.";$("#rev").innerHTML="";
+    v.className="big run";v.textContent=t.status==="running"?"TESTING…":t.ahead>0?"IN LINE…":"STARTING…";
+    $("#rsum").textContent=t.status==="running"?"The robot is on the site right now. Every step shows up here as it happens.":t.ahead>0?`${t.ahead} ${t.ahead===1?"test":"tests"} ahead of this one. It starts by itself.`:"Waking the robot up.";$("#rev").innerHTML="";
     rpBuild(t,true);$("#racts").innerHTML="";setBot("busy");if(!t.frames)$("#vlab").textContent="testing · $"+(t.symbol||"");
   }
   const sl=$("#rsteps");sl.scrollTop=sl.scrollHeight;

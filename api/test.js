@@ -2,7 +2,7 @@
 // POST /api/test { mint, wallet, signature, ts } a holder of 1,000,000 $PROVEN re-tests now, outside the cap
 // GET  /api/test?id=  |  ?mint=                 the test and its result
 import { route, send, readJson, query, HttpError, isPubkey, env, nowS, DAILY_CAP_DEFAULT } from './_lib/util.js';
-export const MAX_AT_ONCE = 2;
+export const MAX_AT_ONCE = 1;
 import { store } from './_lib/store.js';
 import { lookup, holderOk, dispatch } from './_lib/coin.js';
 
@@ -37,7 +37,7 @@ export default route(['GET', 'POST'], async (req, res) => {
   const cap = Number(env('PROVEN_DAILY_CAP', String(DAILY_CAP_DEFAULT)));
   if (!holder && await db.countToday() >= cap) throw new HttpError(429, `Today's ${cap} free tests are used. Holders of 1,000,000 $PROVEN can still test.`);
   const t = await db.add({ mint, ...coin, holder });
-  // Two robots at a time; the rest wait in line and each finished test starts the next one.
+  // One robot at a time (it gets the whole machine); the rest wait in line and each finished test starts the next.
   const started = (await db.running()) < MAX_AT_ONCE ? await dispatch(t.id, req.headers.host) : false;
   send(res, 200, { test: view(t), started });
 });
