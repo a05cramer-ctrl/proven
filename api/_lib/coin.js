@@ -1,5 +1,6 @@
 // Which coin, and which website does the coin itself list? The site always comes from the coin's own public
 // listing (DexScreener, then pump.fun's metadata via Jupiter), never from the person asking for the test.
+import { createHash } from 'node:crypto';
 import bs58 from 'bs58';
 import nacl from 'tweetnacl';
 import { fetchJson, env, isPubkey, rpcUrl, HOLDER_TIER, JUP_TOKENS } from './util.js';
@@ -49,12 +50,18 @@ export async function holderOk({ wallet, signature, ts, mint }, now) {
   } catch { return false; }
 }
 
-/** Start the public GitHub Actions run that does the test. → true when GitHub accepted it. */
-export async function dispatch(id) {
-  const token = env('GH_TOKEN'); const repo = env('GH_REPO');
-  if (!token || !repo) return false;
+/** The shared secret between /api/test and /api/run: derived from the database URL, so it needs no setup and never leaves the server. */
+export function runKey() {
+  const u = env('DATABASE_URL') || env('POSTGRES_URL') || env('DATABASE_URL_UNPOOLED') || 'local';
+  return createHash('sha256').update(`proven:run:${u}`).digest('hex');
+}
+/** Kick off the test in its own function invocation (it runs for minutes; this call returns at once). */
+export async function dispatch(id, host) {
+  if (!host) return false;
+  const proto = /^(localhost|127\.)/.test(host) ? 'http' : 'https';
   try {
-    const r = await fetch(`https://api.github.com/repos/${repo}/actions/workflows/test.yml/dispatches`, { method: 'POST', headers: { Authorization: `Bearer ${token}`, Accept: 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28', 'User-Agent': 'proven', 'Content-Type': 'application/json' }, body: JSON.stringify({ ref: env('GH_REF', 'main'), inputs: { id: String(id) } }), signal: AbortSignal.timeout(8000) });
-    return r.status === 204;
+    const p = fetch(`${proto}://${host}/api/run`, { method: 'POST', headers: { 'content-type': 'application/json', 'x-proven-key': runKey() }, body: JSON.stringify({ id }) }).catch(() => null);
+    await Promise.race([p, new Promise((r) => setTimeout(r, 1200))]);
+    return true;
   } catch { return false; }
 }

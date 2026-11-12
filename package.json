@@ -9,7 +9,10 @@
   "dependencies": {
     "@neondatabase/serverless": "^1.0.0",
     "@solana/web3.js": "^1.98.0",
+    "@sparticuz/chromium": "^153.0.0",
+    "@vercel/functions": "^3.11.1",
     "bs58": "^6.0.0",
+    "playwright-core": "^1.63.0",
     "tweetnacl": "^1.0.3"
   },
   "devDependencies": {

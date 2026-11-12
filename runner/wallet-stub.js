@@ -59,7 +59,7 @@ export function walletStub({ pubkeyB58, pubkeyBytes }) {
   const mk = () => {
     if (document.getElementById('__pv_cur') || !document.documentElement) return;
     const c = document.createElement('div'); c.id = '__pv_cur';
-    c.style.cssText = 'position:fixed;left:0;top:0;width:22px;height:22px;margin:-11px 0 0 -11px;border-radius:50%;background:rgba(57,255,90,.35);border:2px solid #39ff5a;box-shadow:0 0 0 2px rgba(0,0,0,.55);z-index:2147483647;pointer-events:none;transform:translate(640px,360px);transition:transform .45s cubic-bezier(.2,.8,.2,1),width .15s,height .15s,margin .15s';
+    c.style.cssText = 'position:fixed;left:0;top:0;width:22px;height:22px;margin:-11px 0 0 -11px;border-radius:50%;background:rgba(57,255,90,.35);border:2px solid #39ff5a;box-shadow:0 0 0 2px rgba(0,0,0,.55);z-index:2147483647;pointer-events:none;transform:translate(560px,315px);transition:transform .45s cubic-bezier(.2,.8,.2,1),width .15s,height .15s,margin .15s';
     document.documentElement.appendChild(c);
   };
   window.__pvCursor = (x, y, press) => { mk(); const c = document.getElementById('__pv_cur'); if (!c) return; c.style.transform = `translate(${x}px,${y}px)`; if (press) { c.style.width = '34px'; c.style.height = '34px'; c.style.margin = '-17px 0 0 -17px'; setTimeout(() => { c.style.width = '22px'; c.style.height = '22px'; c.style.margin = '-11px 0 0 -11px'; }, 220); } };

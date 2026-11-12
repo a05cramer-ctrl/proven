@@ -5,7 +5,7 @@ import { route, send, readJson, query, HttpError, isPubkey, env, nowS, DAILY_CAP
 import { store } from './_lib/store.js';
 import { lookup, holderOk, dispatch } from './_lib/coin.js';
 
-export const view = (t) => (t ? { id: t.id, mint: t.mint, name: t.name, symbol: t.symbol, icon: t.icon, site: t.site, status: t.status, verdict: t.verdict, overruled: t.overruled, summary: t.summary, findings: t.findings || [], lines: t.lines || [], steps: t.steps || [], video: t.video, poster: t.poster, run_url: t.run_url, model: t.model, error: t.status === 'failed' ? t.error : null, ms: t.ms, created_at: t.created_at, finished_at: t.finished_at } : null);
+export const view = (t) => (t ? { id: t.id, mint: t.mint, name: t.name, symbol: t.symbol, icon: t.icon, site: t.site, status: t.status, verdict: t.verdict, overruled: t.overruled, summary: t.summary, findings: t.findings || [], lines: t.lines || [], steps: t.steps || [], frames: t.frames || 0, model: t.model, error: t.status === 'failed' ? t.error : null, ms: t.ms, created_at: t.created_at, finished_at: t.finished_at } : null);
 
 export default route(['GET', 'POST'], async (req, res) => {
   const db = store();
@@ -30,6 +30,6 @@ export default route(['GET', 'POST'], async (req, res) => {
   const cap = Number(env('PROVEN_DAILY_CAP', String(DAILY_CAP_DEFAULT)));
   if (!holder && await db.countToday() >= cap) throw new HttpError(429, `Today's ${cap} free tests are used. Holders of 1,000,000 $PROVEN can still test.`);
   const t = await db.add({ mint, ...coin, holder });
-  const started = await dispatch(t.id);
+  const started = await dispatch(t.id, req.headers.host);
   send(res, 200, { test: view(t), started });
 });

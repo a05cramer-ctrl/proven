@@ -39,19 +39,20 @@ export function parseAction(raw) {
   } catch { return null; }
 }
 
-/** OpenRouter (or any OpenAI-compatible chat endpoint) with one screenshot per turn. */
-export function openRouterModel({ apiKey, model, base = 'https://openrouter.ai/api/v1' }) {
+/** Any OpenAI-compatible chat endpoint (Vercel AI Gateway, OpenRouter), one screenshot per turn. */
+export function chatModel({ apiKey, model, base }) {
   return async ({ system, user, jpegB64 }) => {
     const content = [{ type: 'text', text: user }];
     if (jpegB64) content.push({ type: 'image_url', image_url: { url: `data:image/jpeg;base64,${jpegB64}` } });
+    let lastErr = 'model unavailable';
     for (let attempt = 0; attempt < 3; attempt++) {
-      const r = await fetch(`${base}/chat/completions`, { method: 'POST', headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json', 'X-Title': 'PROVEN' }, body: JSON.stringify({ model, max_tokens: 400, temperature: 0, messages: [{ role: 'system', content: system }, { role: 'user', content }] }), signal: AbortSignal.timeout(60000) });
-      if (r.status === 429 || r.status >= 500) { await new Promise((s) => setTimeout(s, 1500 * (attempt + 1))); continue; }
+      const r = await fetch(`${base}/chat/completions`, { method: 'POST', headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ model, max_tokens: 400, temperature: 0, messages: [{ role: 'system', content: system }, { role: 'user', content }] }), signal: AbortSignal.timeout(45000) });
+      if (r.status === 429 || r.status >= 500) { lastErr = `model http ${r.status}`; await new Promise((s) => setTimeout(s, 1500 * (attempt + 1))); continue; }
       if (!r.ok) throw new Error(`model http ${r.status}: ${(await r.text()).slice(0, 200)}`);
       const j = await r.json();
       const text = j?.choices?.[0]?.message?.content;
       return typeof text === 'string' ? text : Array.isArray(text) ? text.map((p) => p.text || '').join('') : '';
     }
-    throw new Error('model unavailable');
+    throw new Error(lastErr);
   };
 }

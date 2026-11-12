@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>PROVEN</title>
-<meta name="description" content="An AI uses the product before you buy the coin. Paste any tech coin's CA: a robot opens its site in a real browser, tries the product and stamps it WORKS or NOTHING WORKS, with the recording.">
+<meta name="description" content="An AI uses the product before you buy the coin. Paste any tech coin's CA: a robot opens its site in a real browser, tries the product and stamps it WORKS or NOTHING WORKS. You watch every step.">
 <meta property="og:title" content="PROVEN — An AI uses the product before you buy the coin.">
-<meta property="og:description" content="Paste any tech coin's CA. A robot opens its site, tries the product and stamps it WORKS or NOTHING WORKS, with the recording.">
+<meta property="og:description" content="Paste any tech coin's CA. A robot opens its site, tries the product and stamps it WORKS or NOTHING WORKS. You watch every step.">
 <meta property="og:image" content="https://proven-amber.vercel.app/og.jpg">
 <meta name="twitter:image" content="https://proven-amber.vercel.app/og.jpg">
 <meta name="twitter:card" content="summary_large_image">
@@ -64,8 +64,8 @@ h1 em{font-style:normal;color:var(--ok)}
 .go:hover{background:#7dff7e}.go:disabled{background:var(--line2);color:var(--mut);cursor:default}
 .msg{min-height:22px;margin:10px 0 0;font:400 13px var(--mono);color:var(--mut)}
 .msg.err{color:var(--bad)}.msg.okc{color:var(--ok)}
-.fine{margin:14px 0 0;font:400 12.5px var(--mono);color:var(--dim);max-width:46em}
-.fine b{color:var(--steel);font-weight:500}
+.mini{list-style:none;display:flex;flex-wrap:wrap;gap:10px 22px;margin:16px 0 0;padding:0;font:500 13px var(--mono);color:var(--steel)}
+.mini b{display:inline-grid;place-items:center;width:22px;height:22px;margin-right:8px;background:var(--ok);color:#001a02;font:700 14px var(--px)}
 
 /* the robot: its visor is the screen */
 .bot{position:relative;width:100%;max-width:520px;margin:0 auto;aspect-ratio:1}
@@ -85,8 +85,6 @@ h1 em{font-style:normal;color:var(--ok)}
 .pg .btn.dead{border-color:var(--bad)}
 .pg .btn.live{border-color:var(--ok);background:rgba(57,255,58,.18)}
 .cur{position:absolute;width:5cqw;height:5cqw;margin:-2.5cqw 0 0 -2.5cqw;border-radius:50%;border:.7cqw solid var(--ok);background:rgba(57,255,58,.3);left:0;top:0;opacity:0;z-index:4}
-.face{position:absolute;inset:0;display:grid;place-items:center}
-.face svg{width:46%;height:auto}
 .stamp{position:absolute;left:50%;top:50%;z-index:5;font:700 11cqw/1 var(--px);letter-spacing:.04em;padding:3cqh 3.5cqw;border:1cqw solid currentColor;white-space:nowrap;transform:translate(-50%,-50%) rotate(-7deg) scale(1);opacity:0;background:rgba(0,0,0,.72)}
 .stamp.ok{color:var(--ok)}.stamp.bad{color:var(--bad)}.stamp.down{color:var(--warn)}
 .light{position:absolute;left:46.875%;top:4.6875%;width:6.25%;height:4.6875%;background:var(--ok)}
@@ -99,6 +97,16 @@ h1 em{font-style:normal;color:var(--ok)}
 .card{border:1px solid var(--line2);background:var(--panel);display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr)}
 .card .media{position:relative;background:#000;border-right:1px solid var(--line2);min-height:300px;display:grid;place-items:center}
 .card .media video,.card .media img{width:100%;height:auto;max-height:520px;object-fit:contain;display:block}
+/* replay: the saved screens, one per step */
+.rp{position:relative;width:100%}
+.rp img{width:100%;height:auto;display:block;aspect-ratio:16/9;object-fit:cover;background:#000}
+.rp .cap{position:absolute;left:0;right:0;bottom:0;padding:26px 14px 10px;background:linear-gradient(transparent,rgba(0,0,0,.92));font:400 12.5px var(--mono);color:var(--fg);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rp .cap b{color:var(--ok);font-weight:500}.rp .cap.d b{color:var(--bad)}
+.rp .bar{position:absolute;left:0;right:0;top:0;display:flex;gap:3px;padding:8px}
+.rp .bar i{flex:1;height:4px;background:rgba(255,255,255,.22);cursor:pointer}.rp .bar i.on{background:var(--ok)}
+.rp .nav{position:absolute;top:50%;transform:translateY(-50%);width:38px;height:38px;border:1px solid var(--line2);background:rgba(0,0,0,.7);cursor:pointer;font:500 16px var(--mono)}
+.rp .nav.l{left:8px}.rp .nav.r{right:8px}.rp .nav:hover{border-color:var(--ok)}
+.rp .live{position:absolute;right:10px;top:20px;font:700 13px var(--px);color:#001a02;background:var(--ok);padding:3px 7px;animation:blink 1s steps(2) infinite}
 .card .media .wait{position:absolute;inset:0;display:grid;place-items:center;text-align:center;font:400 13px var(--mono);color:var(--mut);padding:20px}
 .card .info{padding:22px 24px;min-width:0}
 .coin{display:flex;align-items:center;gap:10px;font:500 13px var(--mono);color:var(--mut);min-width:0}
@@ -136,7 +144,7 @@ h2{font:700 clamp(28px,3.4vw,40px)/1.05 var(--px);margin:0 0 8px;text-wrap:balan
 .wall{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
 .tile{border:1px solid var(--line2);background:var(--panel);text-align:left;padding:0;cursor:pointer;display:block;min-width:0}
 .tile:hover{border-color:var(--grey)}
-.tile .th{aspect-ratio:16/9;background:#000 center/cover no-repeat;position:relative;border-bottom:1px solid var(--line2)}
+.tile .th{aspect-ratio:16/9;background:#000 center top/cover no-repeat;position:relative;border-bottom:1px solid var(--line2)}
 .tile .tg{position:absolute;left:10px;bottom:10px;font:700 15px/1 var(--px);letter-spacing:.04em;padding:5px 7px;border:2px solid currentColor;background:rgba(0,0,0,.8)}
 .tile .tg.ok{color:var(--ok)}.tile .tg.bad{color:var(--bad)}.tile .tg.down{color:var(--warn)}
 .tile .tb{padding:12px 14px}
@@ -206,13 +214,13 @@ footer a{color:var(--mut)}
 <section class="hero"><div class="wrap">
   <div>
     <h1 class="rv">An AI uses the product <em>before you buy the coin.</em></h1>
-    <p class="lede rv">Paste a tech coin's CA. A robot opens the coin's own site in a real browser, connects a test wallet, tries the product and stamps it. You get the recording.</p>
+    <p class="lede rv">Paste a tech coin's CA. A robot opens the coin's own site in a real browser, connects a test wallet, tries the product and stamps it. You watch every step.</p>
     <form class="slot rv" id="f" autocomplete="off">
       <input id="mint" name="mint" inputmode="text" spellcheck="false" placeholder="Paste a contract address" aria-label="Contract address">
       <button class="go" id="go" type="submit">TEST IT</button>
     </form>
     <p class="msg" id="msg" role="status"></p>
-    <p class="fine rv">One test per coin per <b id="ch">24</b> h · <b id="capleft"><span class="sk"></span></b> free tests left today · takes about two minutes</p>
+    <ol class="mini rv"><li><b>1</b>Paste a CA</li><li><b>2</b>The robot uses the site</li><li><b>3</b>Stamp + full replay</li></ol>
   </div>
   <div class="bot rv" id="bot">
     <img class="pix" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAIAAAAlC+aJAAABPklEQVR42mNgGAWjgCLASDujLf9bwdnHGY/RyBamoR4DTKOJECdYumHH0g07RmNg1AOjHhj1wPD2AJVr4nNXbkEYcjKSaFKPnjyHMIx01EZjYAQmITxpg7qA1JQ2moQGeRLCk3J2HjhKRXe4O1iTl5ZGk9BAAxZSNYgI8NLUQW8+fB6tyEY9MBjzAHULTWIs0lRRGk1CQzQJIRdk8OpwAAGyezAL8dEkNOqBUQ8Mv1JoMJQ8xLtnNAkNwiR0/c49OJvIBglNAdw9WB0zmoQGYRKCxxRyWhpYgCclkzysQrc+8eiwynAdVoFHMa1H5kYbc8MjCWGWpPDiiOxIJ7LpRmQhPpqEGIbIFBN82Qatm3fwlBMd4DGahEbBKBgFI26xB57SltTycbQxN3KSELzbSeRSEOSRNsrXDo0moYEGAE3KZXYiFGGTAAAAAElFTkSuQmCC" alt="PROVEN, a pixel robot whose visor is a screen">
@@ -245,7 +253,7 @@ footer a{color:var(--mut)}
 
 <section id="tested"><div class="wrap">
   <h2>Tested</h2>
-  <p class="sub">Every verdict, newest first. Open one for the recording and what each click did.</p>
+  <p class="sub">Every verdict, newest first. Open one for the replay and what each click did.</p>
   <div class="wall" id="wall"><div class="ghost"></div><div class="ghost"></div><div class="ghost"></div><div class="ghost"></div></div>
 </div></section>
 
@@ -253,7 +261,7 @@ footer a{color:var(--mut)}
   <h2>What the robot does</h2>
   <p class="sub">The same thing you would do with ten minutes and a burner wallet.</p>
   <div class="how">
-    <div><p class="k">1 · OPENS IT</p><h3>The coin's own site</h3><p>The site comes from the coin's listing, never from whoever asks. It loads in a real Chromium browser and the screen is recorded from the first frame.</p></div>
+    <div><p class="k">1 · OPENS IT</p><h3>The coin's own site</h3><p>The site comes from the coin's listing, never from whoever asks. It loads in a real Chromium browser and every screen is saved.</p></div>
     <div><p class="k">2 · USES IT</p><h3>Clicks like a buyer</h3><p>It finds the main button, connects a wallet, fills the form and goes for the core action: launch, swap, create, play. Up to 12 steps.</p></div>
     <div><p class="k">3 · STAMPS IT</p><h3>WORKS or NOTHING WORKS</h3><p>Dead buttons, "coming soon" and pages that only link to pump.fun get the red stamp. A product that reaches a real transaction gets the green one.</p></div>
   </div>
@@ -261,10 +269,10 @@ footer a{color:var(--mut)}
 
 <section id="verify"><div class="wrap">
   <h2>Don't trust the robot. Check it.</h2>
-  <p class="sub">The stamp is an opinion. Everything under it is measured.</p>
+  <p class="sub">Every stamp comes with the measurements under it.</p>
   <div class="rules">
-    <div><b>Every test is a public run</b><p>Tests run on GitHub Actions in the open. Each result links to its run log: every step, every click, the verdict. <a id="repo" href="#" target="_blank" rel="noopener" hidden>Read the code ↗</a></p></div>
-    <div><b>The recording is the proof</b><p>The full session is saved to IPFS and shown with the verdict. If the stamp is wrong, the video shows it.</p></div>
+    <div><b>Every step is on the page</b><p>Each verdict comes with its full replay: what the robot clicked, what it typed and what happened next, one screen per step.</p></div>
+    <div><b>The code is public</b><p>The robot, its rules and this site are open source. <a id="repo" href="#" target="_blank" rel="noopener" hidden>Read the code ↗</a></p></div>
     <div><b>Evidence overrules the AI</b><p>WORKS needs at least one click that measurably did something. NOTHING WORKS cannot stand next to a real transaction for an on-chain program. The counters decide, not the wording on the page.</p></div>
     <div><b>The wallet can't lose anything</b><p>A fresh key per test, with nothing in it. It connects and signs messages. Every transaction is recorded and declined.</p></div>
   </div>
@@ -275,7 +283,7 @@ footer a{color:var(--mut)}
     <img class="pix" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAIAAAAlC+aJAAABYUlEQVR42u2aPwuCUBTFVVqFhpYgGiKCoKmtWqqlxvY+n7ujLdWSbU1CENEQQUtD4AeoQbiJrx4+fea/c6YHkt7L/XXe9foUBYJiSU3u1oPXkNZ71U7oKVreK6ABwp8yTMswLVQACSABJFDsBCTvxAfn5C2ajXrg0vV29xb9XgcVKCFCHDbkSpQ0IJRxhDjkrLY7iXHMxqNoLAGhtFUR/UGtqica0OPpYiNDAln8D0g0Tf64hR7UbbeAUE4R8hsZbYcSyXE30Y2VNXEglLudmFVv/XEVfRK0F5YcZ2qjAsVGSNR5/EgQThLJ4ccDhDKI0PF8oXXIhoTFiViK7zkUz9dggFAGEaJK+VlKVxyShccqf3snxlilqM0clTjpyRyauWIgxDop2VHkoods3UKaOBBScvKJiY5tiLZ3kVu35WIOhCAIKt1hD47bivojmrnyIESvnSGPgvgnbfHPDgGhtPUGTdyAeO6ad/UAAAAASUVORK5CYII=" alt="">
     <div>
       <h2>$PROVEN</h2>
-      <p>Everyone gets one test per coin per day, out of <span id="cap2">100</span> free tests a day. Hold <b id="tier">1,000,000</b> $PROVEN and you re-test any coin, any time, outside the cap. You sign a message; nothing leaves your wallet.</p>
+      <p>Every coin gets one free test a day. Hold <b id="tier">1,000,000</b> $PROVEN and you re-test any coin, any time. You sign a message; nothing leaves your wallet.</p>
       <div class="acts"><a class="btn2 p" id="buy" href="#" target="_blank" rel="noopener" hidden>Buy on pump.fun</a><a class="btn2" id="chart" href="#" target="_blank" rel="noopener" hidden>Chart</a><button class="btn2" id="retest" type="button">Re-test as a holder</button></div>
     </div>
   </div>
@@ -283,15 +291,14 @@ footer a{color:var(--mut)}
 
 <section id="faq"><div class="wrap">
   <h2>Questions</h2>
-  <details><summary>My coin got NOTHING WORKS and the product is real.</summary><p>Watch the recording first: it shows exactly where the robot got stuck. Fix what a new visitor can't get past, then anyone holding 1,000,000 $PROVEN can re-test right away, and everyone can after 24 hours. Old verdicts stay visible with their date.</p></details>
   <details><summary>What counts as WORKS?</summary><p>The robot used the core thing the site says it does, or got as far as a real transaction or signature request. Live data that answers to its input counts. A dashboard screenshot does not.</p></details>
-  <details><summary>Can a site talk the robot into a green stamp?</summary><p>Page text is treated as untrusted, and the measured evidence overrules the model: a page where no click does anything cannot be stamped WORKS, whatever it says.</p></details>
-  <details><summary>Which coins can be tested?</summary><p>Any Solana coin that lists its own website. Coins with only an X or Telegram link have no product to open, so there is nothing to test.</p></details>
-  <details><summary>Is a green stamp a reason to buy?</summary><p>No. It means the product did something when a robot used it today. It says nothing about the team, the chart or tomorrow.</p></details>
+  <details><summary>My coin got NOTHING WORKS and the product is real.</summary><p>Watch the replay: it shows exactly where the robot got stuck. Fix what a new visitor can't get past. Anyone holding 1,000,000 $PROVEN can re-test right away, and everyone can after 24 hours.</p></details>
+  <details><summary>Can a site talk the robot into a green stamp?</summary><p>No. Page text is treated as untrusted, and the measured evidence overrules the AI: a page where no click does anything cannot be stamped WORKS, whatever it says.</p></details>
+  <details><summary>Which coins can be tested?</summary><p>Any Solana coin that lists its own website.</p></details>
 </div></section>
 </main>
 
-<footer><div class="wrap"><span>PROVEN · a robot tried it so you don't have to</span><span><a href="#verify">how verdicts are made</a></span></div></footer>
+<footer><div class="wrap"><span>PROVEN · a robot tried it so you don't have to</span><span><a href="#how">how it works</a></span></div></footer>
 
 <script src="config.js"></script>
 <script>
@@ -299,11 +306,12 @@ footer a{color:var(--mut)}
 const C=window.PROVEN_CFG||{};const API=(C.API||"").replace(/\/+$/,"");
 const $=(s,r=document)=>r.querySelector(s);const $$=(s,r=document)=>[...r.querySelectorAll(s)];
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-const IPFS=cid=>cid?`https://ipfs.filebase.io/ipfs/${cid}`:"";
+const FR=(id,n)=>`${API}/api/frame?id=${id}&n=${n}`;
 const cls=v=>v==="WORKS"?"ok":v==="SITE DOWN"?"down":"bad";
 const ago=ts=>{const s=Math.max(0,Math.round((Date.now()-Date.parse(ts))/1000));return s<60?`${s}s ago`:s<3600?`${Math.floor(s/60)}m ago`:s<86400?`${Math.floor(s/3600)}h ago`:`${Math.floor(s/86400)}d ago`};
 const host=u=>{try{return new URL(u).host.replace(/^www\./,"")}catch{return""}};
 async function api(path,opt){const r=await fetch(API+path,opt);let j=null;try{j=await r.json()}catch{}if(!r.ok)throw Object.assign(new Error(j?.error||`error ${r.status}`),{status:r.status,body:j});return j}
+const reduced=matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 /* config → links */
 const ca=C.CA||"";
@@ -312,44 +320,48 @@ if(C.X){$("#x").href=C.X;$("#x").hidden=false}
 const buy=C.BUY||(ca?`https://pump.fun/coin/${ca}`:""),chart=C.CHART||(ca?`https://gmgn.ai/sol/token/${ca}`:"");
 if(buy){$("#buy").href=buy;$("#buy").hidden=false}if(chart){$("#chart").href=chart;$("#chart").hidden=false}
 
-/* the visor stage: one deterministic timeline, used by the intro and by the idle face */
-const CHECK='<svg viewBox="0 0 14 10" shape-rendering="crispEdges" aria-hidden="true"><g fill="#39ff3a"><rect x="0" y="4" width="2" height="2"/><rect x="2" y="4" width="2" height="2"/><rect x="2" y="6" width="2" height="2"/><rect x="4" y="6" width="2" height="2"/><rect x="4" y="8" width="2" height="2"/><rect x="6" y="6" width="2" height="2" fill="#2cbe3a"/><rect x="6" y="4" width="2" height="2"/><rect x="8" y="4" width="2" height="2" fill="#2cbe3a"/><rect x="8" y="2" width="2" height="2"/><rect x="10" y="2" width="2" height="2" fill="#2cbe3a"/><rect x="10" y="0" width="2" height="2"/></g></svg>';
-function buildStage(el){el.innerHTML=`<div class="pg"><i class="t1"></i><i class="t2"></i><i class="t3"></i><i class="btn"></i></div><div class="cur"></div><div class="stamp bad">NOTHING WORKS</div><div class="face">${CHECK}</div>`;return{pg:$(".pg",el),btn:$(".btn",el),cur:$(".cur",el),stamp:$(".stamp",el),face:$(".face",el)}}
+/* the visor stage: one deterministic timeline, used by the intro and by the idle loop */
+function buildStage(el){el.innerHTML=`<div class="pg"><i class="t1"></i><i class="t2"></i><i class="t3"></i><i class="btn"></i></div><div class="cur"></div><div class="stamp bad">NOTHING WORKS</div>`;return{pg:$(".pg",el),btn:$(".btn",el),cur:$(".cur",el),stamp:$(".stamp",el)}}
 const E=x=>x<=0?0:x>=1?1:1-Math.pow(2,-10*x);const seg=(t,a,b)=>Math.min(1,Math.max(0,(t-a)/(b-a)));
-/* beats: 0–.5 a page appears · .5–1.35 the cursor goes to its one button and clicks twice, nothing happens · 1.35–2.0 the stamp lands */
-function stageFrame(p,t){
-  p.face.style.opacity=t<0.02?1:0;
+/* beats: 0–.5 a page appears · .5–1.35 the cursor goes to its one button and clicks · 1.35–2.0 the stamp lands. ok = the button answers. */
+function stageFrame(p,t,ok){
   p.pg.style.opacity=E(seg(t,.05,.45));
-  const mv=E(seg(t,.5,.95));p.cur.style.opacity=t>.45&&t<2.6?1:0;
+  const mv=E(seg(t,.5,.95));p.cur.style.opacity=t>.45&&t<2.9?1:0;
   p.cur.style.left=(78-57*mv)+"cqw";p.cur.style.top=(22+31*mv)+"cqh";
   const c1=t>1.0&&t<1.12,c2=t>1.2&&t<1.32;p.cur.style.transform=`scale(${c1||c2?1.7:1})`;
-  p.btn.className="btn"+(t>1.0?" dead":"");
+  p.btn.className="btn"+(t>1.0?(ok?" live":" dead"):"");
+  p.stamp.className="stamp "+(ok?"ok":"bad");p.stamp.textContent=ok?"WORKS":"NOTHING WORKS";
   const s=seg(t,1.4,1.62);p.stamp.style.opacity=s>0?1:0;p.stamp.style.transform=`translate(-50%,-50%) rotate(-7deg) scale(${3-2*E(s)})`;
 }
 const stage=buildStage($("#stage"));
-const reduced=matchMedia("(prefers-reduced-motion: reduce)").matches;
-function showFace(){stage.pg.style.opacity=0;stage.cur.style.opacity=0;stage.stamp.style.opacity=0;stage.face.style.opacity=1}
-showFace();
+/* idle: the visor keeps showing what a test is, one dead site, one working site, on repeat */
+let idle=true,idleT0=performance.now();
+function idleTick(now){
+  if(idle&&!document.hidden){const LOOP=3.4;const t=((now-idleT0)/1000);const k=Math.floor(t/LOOP);stageFrame(stage,reduced?2.5:t%LOOP,k%2===1);$("#bot").classList.toggle("fail",k%2===0&&(t%LOOP)>1.4)}
+  requestAnimationFrame(idleTick);
+}
+stageFrame(stage,reduced?2.5:0,false);requestAnimationFrame(idleTick);
+function stopIdle(){idle=false;stage.pg.style.opacity=0;stage.cur.style.opacity=0;stage.stamp.style.opacity=0}
 
 /* intro */
 function reveal(){document.body.classList.remove("pre")}
 (function intro(){
   let seen=false;try{seen=sessionStorage.getItem("pv_intro")==="1"}catch{}
   const el=$("#intro");
-  if(reduced||seen){return}
-  document.body.classList.add("pre");el.hidden=false;
+  if(reduced||seen||/^#t-\d+$/.test(location.hash)){return}
+  document.body.classList.add("pre");el.hidden=false;idle=false;
   const ip=buildStage($("#istage"));const ib=$(".ibot",el);const target=$("#bot");
   let t0=null,done=false,raf=0;
   const END=2.05,FLY=.55;
-  function finish(){if(done)return;done=true;cancelAnimationFrame(raf);el.hidden=true;try{sessionStorage.setItem("pv_intro","1")}catch{}reveal()}
+  function finish(){if(done)return;done=true;cancelAnimationFrame(raf);el.hidden=true;try{sessionStorage.setItem("pv_intro","1")}catch{}reveal();if(!CUR){idle=true;idleT0=performance.now()-2100}}
   function frame(now){
     if(t0===null)t0=now;const t=(now-t0)/1000;
-    stageFrame(ip,Math.min(t,END));
+    stageFrame(ip,Math.min(t,END),false);
     if(t>END){
-      const k=E(seg(t,END,END+FLY));const a=ib.getBoundingClientRect(),b=target.getBoundingClientRect();
+      const k=E(seg(t,END,END+FLY));const b=target.getBoundingClientRect();
       const base=ib.offsetWidth;const sc=1+(b.width/base-1)*k;
       const ax=innerWidth/2,ay=innerHeight/2;const bx=b.left+b.width/2,by=b.top+b.height/2;
-      ib.style.transform=`translate(${(bx-ax)*k}px,${(by-ay+ (0.023*base*(1-sc)))*k}px) scale(${sc})`;
+      ib.style.transform=`translate(${(bx-ax)*k}px,${(by-ay+(0.023*base*(1-sc)))*k}px) scale(${sc})`;
       el.style.background=`rgba(0,0,0,${1-k})`;
       if(k>.25)reveal();
       if(t>END+FLY){finish();return}
@@ -359,74 +371,88 @@ function reveal(){document.body.classList.remove("pre")}
   const start=()=>{raf=requestAnimationFrame(frame)};
   ["pointerdown","keydown","wheel","touchstart"].forEach(ev=>addEventListener(ev,finish,{once:true,passive:true}));
   if(document.fonts&&document.fonts.ready){let s=false;const go=()=>{if(!s){s=true;start()}};document.fonts.ready.then(go);setTimeout(go,600)}else start();
-  window.__pvIntro={frame:t=>{stageFrame(ip,Math.min(t,END))}};
 })();
 
 /* feed: totals + wall */
-let FEED=null;
 function tile(t){
   const b=document.createElement("button");b.type="button";b.className="tile";
-  b.innerHTML=`<div class="th"${t.poster?` style="background-image:url('${IPFS(t.poster)}')"`:""}><span class="tg ${cls(t.verdict)}">${esc(t.verdict)}</span></div><div class="tb"><div class="tn">${esc(t.name||t.symbol||"coin")} <span class="mono" style="font-size:12px;color:var(--mut)">$${esc(t.symbol)}</span></div><div class="ts">${esc(host(t.site))} · ${esc(ago(t.finished_at))}</div></div>`;
+  b.innerHTML=`<div class="th"${t.frames?` style="background-image:url('${FR(t.id,t.frames-1)}')"`:""}><span class="tg ${cls(t.verdict)}">${esc(t.verdict)}</span></div><div class="tb"><div class="tn">${esc(t.name||t.symbol||"coin")} <span class="mono" style="font-size:12px;color:var(--mut)">$${esc(t.symbol)}</span></div><div class="ts">${esc(host(t.site))} · ${esc(ago(t.finished_at))}</div></div>`;
   b.onclick=()=>open(t.id,true);return b;
 }
 async function loadFeed(){
   try{
-    const f=await api("/api/feed");FEED=f;
+    const f=await api("/api/feed");
     $$("[data-s]").forEach(e=>e.textContent=Number(f.totals[e.dataset.s]||0).toLocaleString("en-US"));
-    $("#ch").textContent=f.cache_hours;$("#cap2").textContent=f.daily_cap;$("#tier").textContent=Number(f.holder_tier).toLocaleString("en-US");
-    $("#capleft").textContent=f.open?Math.max(0,f.daily_cap-f.today):"0";
+    $("#tier").textContent=Number(f.holder_tier).toLocaleString("en-US");
     if(f.repo){$("#repo").href=`https://github.com/${f.repo}`;$("#repo").hidden=false}
     const w=$("#wall");w.innerHTML="";
-    if(!f.recent.length){w.innerHTML=`<div class="empty">${f.open?"No tests yet. Paste a CA and be the first.":"The test bench is not switched on yet."}</div>`}
+    if(!f.recent.length)w.innerHTML=`<div class="empty">No coin has been tested yet. Paste a CA and yours is the first stamp on the wall.</div>`;
     else f.recent.forEach(t=>w.appendChild(tile(t)));
-    if(!f.open&&!$("#msg").textContent){$("#msg").textContent="The test bench is not switched on yet."}
-    if(f.recent[0]&&!CUR)visorPoster(f.recent[0]);
-  }catch{ const w=$("#wall");if(w.querySelector(".ghost"))w.innerHTML='<div class="empty">The test bench is not switched on yet.</div>';$$("[data-s]").forEach(e=>{if(e.querySelector(".sk"))e.textContent="–"});$("#capleft").textContent="0" }
-}
-function visorPoster(t){
-  if(!t.poster)return;const v=$("#visor");$$(".poster",v).forEach(n=>n.remove());
-  const i=new Image();i.className="poster";i.alt="";i.onload=()=>{v.insertBefore(i,$("#stage"));stage.face.style.opacity=0;stage.stamp.className="stamp "+cls(t.verdict);stage.stamp.textContent=t.verdict;stage.stamp.style.opacity=1;stage.stamp.style.transform="translate(-50%,-50%) rotate(-7deg) scale(1)";$("#vlab").textContent="last test · $"+(t.symbol||"")};i.src=IPFS(t.poster);
+  }catch{}
 }
 
-/* one test: ask, poll, show */
-let CUR=null,poll=0;
+/* one test: ask, follow it live, replay it */
+let CUR=null,poll=0,RP={id:0,n:0,i:0,timer:0,auto:true};
 function setBot(state){const b=$("#bot");b.classList.toggle("busy",state==="busy");b.classList.toggle("fail",state==="fail")}
+function visorShow(t,i){
+  stopIdle();const v=$("#visor");let im=$(".poster",v);if(!im){im=new Image();im.className="poster";im.alt="";v.insertBefore(im,$("#stage"))}
+  if(t.frames)im.src=FR(t.id,Math.min(i,t.frames-1));
+  if(t.status==="done"){stage.stamp.className="stamp "+cls(t.verdict);stage.stamp.textContent=t.verdict;stage.stamp.style.opacity=1;stage.stamp.style.transform="translate(-50%,-50%) rotate(-7deg) scale(1)"}else stage.stamp.style.opacity=0;
+  $("#vlab").textContent=(t.status==="done"?"tested":"testing")+" · $"+(t.symbol||"");
+}
+const stepLine=x=>x.action==="open"?"opened the site":`${x.action}${x.target?" "+x.target:""}${x.typed?` = "${x.typed}"`:""}`;
+const stepSays=x=>x.error?"could not do it":x.dead?"nothing happened":x.left?`left the site${typeof x.left==="string"&&x.left!=="another site"?" → "+x.left:""}`:x.wallet?"wallet called":x.says||"ok";
+function capFor(t,i){const st=(t.steps||[]).filter(x=>x.action!=="done");if(i===0)return{txt:"<b>0</b> opened "+esc(host(t.site)),d:false};const x=st[i-1];return x?{txt:`<b>${x.n}</b> ${esc(stepLine(x))} → ${esc(stepSays(x))}`,d:!!x.dead}:{txt:"",d:false}}
+function rpShow(t,i){RP.i=i;const m=$("#media");const im=$(".rp img",m);if(!im)return;im.src=FR(t.id,i);const c=capFor(t,i);const cap=$(".rp .cap",m);cap.innerHTML=c.txt;cap.classList.toggle("d",c.d);$$(".rp .bar i",m).forEach((e,k)=>e.classList.toggle("on",k<=i));visorShow(t,i)}
+function rpBuild(t,live){
+  const m=$("#media");clearInterval(RP.timer);
+  if(!t.frames){m.innerHTML=`<div class="wait">${t.status==="done"?"No screens were saved for this test.":"Opening the site…"}</div>`;return}
+  if(RP.id!==t.id||RP.n!==t.frames||!$(".rp",m)){
+    m.innerHTML=`<div class="rp"><img alt="Screen from the test"><div class="bar">${Array.from({length:t.frames},()=>"<i></i>").join("")}</div>${live?'<span class="live">LIVE</span>':'<button class="nav l" type="button" aria-label="Previous step">‹</button><button class="nav r" type="button" aria-label="Next step">›</button>'}<div class="cap"></div></div>`;
+    $$(".rp .bar i",m).forEach((e,k)=>e.onclick=()=>{RP.auto=false;rpShow(t,k)});
+    if(!live){$(".rp .nav.l",m).onclick=()=>{RP.auto=false;rpShow(t,(RP.i-1+t.frames)%t.frames)};$(".rp .nav.r",m).onclick=()=>{RP.auto=false;rpShow(t,(RP.i+1)%t.frames)}}
+    const fresh=RP.id!==t.id;RP.id=t.id;RP.n=t.frames;if(fresh)RP.auto=true;
+    rpShow(t,live?t.frames-1:fresh?0:Math.min(RP.i,t.frames-1));
+  }
+  if(!live&&!reduced)RP.timer=setInterval(()=>{if(RP.auto&&!document.hidden)rpShow(t,(RP.i+1)%t.frames)},1500);
+}
 function render(t){
-  CUR=t;$("#result").hidden=false;
+  CUR=t;$("#result").hidden=false;stopIdle();
   $("#rname").textContent=(t.name||"coin")+(t.symbol?` $${t.symbol}`:"");const s=$("#rsite");s.textContent=host(t.site);s.href=t.site;
-  const v=$("#rverdict"),m=$("#media");
+  const v=$("#rverdict");const steps=(t.steps||[]).filter(x=>x.action!=="done");
+  $("#rsteps").innerHTML=steps.map(x=>`<li class="${x.dead?"d":x.wallet?"w":""}">${x.n}. ${esc(stepLine(x))} → ${esc(stepSays(x))}</li>`).join("");
   if(t.status==="done"){
     v.className="big "+cls(t.verdict);v.textContent=t.verdict;
     $("#rsum").textContent=t.summary||"";
     $("#rev").innerHTML=(t.lines||[]).map(l=>`<li>${esc(l)}</li>`).join("");
-    $("#rsteps").innerHTML=(t.steps||[]).filter(x=>x.action!=="done").map(x=>`<li class="${x.dead?"d":x.wallet?"w":""}">${x.n}. ${esc(x.action)}${x.target?" "+esc(x.target):""}${x.typed?` = "${esc(x.typed)}"`:""} → ${x.dead?"nothing happened":x.left?"left the site":x.wallet?"wallet called":"ok"}</li>`).join("");
-    m.innerHTML=t.video?`<video controls playsinline muted autoplay loop ${t.poster?`poster="${IPFS(t.poster)}"`:""} src="${IPFS(t.video)}"></video>`:t.poster?`<img alt="Last screen of the test" src="${IPFS(t.poster)}">`:`<div class="wait">No recording was saved for this test.</div>`;
+    rpBuild(t,false);
     const text=`${t.verdict}: PROVEN's robot just tried $${t.symbol||""}'s product.\n\n${t.summary||""}`;
-    $("#racts").innerHTML=`<a class="btn2 p" target="_blank" rel="noopener" href="https://x.com/intent/tweet?text=${encodeURIComponent(text)}${C.SITE?`&url=${encodeURIComponent(C.SITE+"#t-"+t.id)}`:""}">Post to X</a>${t.run_url?`<a class="btn2" target="_blank" rel="noopener" href="${esc(t.run_url)}">Run log ↗</a>`:""}${t.video?`<a class="btn2" target="_blank" rel="noopener" href="${IPFS(t.video)}">Video file ↗</a>`:""}<span class="mono" style="align-self:center;font-size:12px;color:var(--dim)">tested ${esc(ago(t.finished_at))}${t.overruled?" · model overruled by evidence":""}</span>`;
-    setBot(t.verdict==="WORKS"?"":"fail");visorPoster(t);
+    $("#racts").innerHTML=`<a class="btn2 p" target="_blank" rel="noopener" href="https://x.com/intent/tweet?text=${encodeURIComponent(text)}${C.SITE?`&url=${encodeURIComponent(C.SITE+"/#t-"+t.id)}`:""}">Post to X</a><button class="btn2" type="button" id="cplink">Copy link</button><span class="mono" style="align-self:center;font-size:12px;color:var(--dim)">tested ${esc(ago(t.finished_at))}</span>`;
+    $("#cplink").onclick=async e=>{try{await navigator.clipboard.writeText((C.SITE||location.origin)+"/#t-"+t.id);e.target.textContent="Copied"}catch{}};
+    setBot(t.verdict==="WORKS"?"":"fail");
   }else if(t.status==="failed"){
-    v.className="big run";v.textContent="TEST FAILED";$("#rsum").textContent="The test did not finish. Nothing was stamped. Try again in a minute.";$("#rev").innerHTML="";$("#rsteps").innerHTML="";m.innerHTML=`<div class="wait">No result.</div>`;$("#racts").innerHTML="";setBot("");
+    v.className="big run";v.textContent="NO VERDICT";$("#rsum").textContent="The robot lost the connection before it could finish. Run it again.";$("#rev").innerHTML="";$("#media").innerHTML=`<div class="wait">No verdict for this run.</div>`;
+    $("#racts").innerHTML=`<button class="btn2 p" type="button" id="again">Test again</button>`;$("#again").onclick=()=>ask({mint:t.mint});setBot("");
   }else{
-    v.className="big run";v.textContent=t.status==="running"?"TESTING…":"IN LINE…";
-    $("#rsum").textContent=t.status==="running"?"The robot is on the site right now.":"Waiting for a free robot.";$("#rev").innerHTML="";$("#rsteps").innerHTML="";
-    m.innerHTML=`<div class="wait">Recording in progress.<br>The video appears here when the test ends.</div>`;
-    $("#racts").innerHTML=t.run_url?`<a class="btn2" target="_blank" rel="noopener" href="${esc(t.run_url)}">Watch the run live ↗</a>`:"";
-    setBot("busy");$("#vlab").textContent="testing · $"+(t.symbol||"");
+    v.className="big run";v.textContent=t.status==="running"?"TESTING…":"STARTING…";
+    $("#rsum").textContent=t.status==="running"?"The robot is on the site right now. Every step shows up here as it happens.":"Waking the robot up.";$("#rev").innerHTML="";
+    rpBuild(t,true);$("#racts").innerHTML="";setBot("busy");if(!t.frames)$("#vlab").textContent="testing · $"+(t.symbol||"");
   }
+  const sl=$("#rsteps");sl.scrollTop=sl.scrollHeight;
 }
 async function open(id,scroll){
   clearTimeout(poll);
   try{const {test}=await api(`/api/test?id=${id}`);render(test);if(scroll)$("#result").scrollIntoView({behavior:reduced?"auto":"smooth",block:"start"});try{history.replaceState(null,"","#t-"+id)}catch{}
-    if(test.status==="queued"||test.status==="running")poll=setTimeout(()=>open(id,false),5000);else loadFeed();
-  }catch(e){$("#msg").className="msg err";$("#msg").textContent=e.message}
+    if(test.status==="queued"||test.status==="running")poll=setTimeout(()=>open(id,false),2000);else loadFeed();
+  }catch(e){poll=setTimeout(()=>open(id,false),4000)}
 }
 async function ask(body){
   const go=$("#go"),msg=$("#msg");go.disabled=true;msg.className="msg";msg.textContent="Looking up the coin…";
   try{const r=await api("/api/test",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(body)});
-    msg.className="msg okc";msg.textContent=r.cached?(r.test.status==="done"?"Already tested today. Here is the verdict.":"Already being tested."):"Test started.";
+    msg.className="msg okc";msg.textContent=r.cached?(r.test.status==="done"?"Tested in the last 24 hours. Here is the verdict.":"This coin is being tested right now."):"The robot is on it.";
     render(r.test);$("#result").scrollIntoView({behavior:reduced?"auto":"smooth",block:"start"});try{history.replaceState(null,"","#t-"+r.test.id)}catch{}
-    if(r.test.status!=="done"&&r.test.status!=="failed")poll=setTimeout(()=>open(r.test.id,false),5000);
-  }catch(e){msg.className="msg err";msg.textContent=e.status===503?"The test bench is not switched on yet.":e.message==="Failed to fetch"?"Can't reach the test bench right now.":e.message}
+    if(r.test.status!=="done"&&r.test.status!=="failed")poll=setTimeout(()=>open(r.test.id,false),1800);
+  }catch(e){msg.className="msg err";msg.textContent=e.status?e.message:"Couldn't reach the robot. Try again."}
   finally{go.disabled=false}
 }
 $("#f").addEventListener("submit",ev=>{ev.preventDefault();const m=$("#mint").value.trim();if(!/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(m)){$("#msg").className="msg err";$("#msg").textContent="That is not a Solana contract address.";return}ask({mint:m})});

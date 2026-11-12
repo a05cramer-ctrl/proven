@@ -1,1 +1,18 @@
-{ "functions": { "api/test.js": { "maxDuration": 30 }, "api/runner.js": { "maxDuration": 15 }, "api/feed.js": { "maxDuration": 15 } } }
+{
+  "functions": {
+    "api/run.js": {
+      "maxDuration": 300,
+      "memory": 2048,
+      "includeFiles": "node_modules/@sparticuz/chromium/bin/**"
+    },
+    "api/test.js": {
+      "maxDuration": 30
+    },
+    "api/feed.js": {
+      "maxDuration": 15
+    },
+    "api/frame.js": {
+      "maxDuration": 10
+    }
+  }
+}
