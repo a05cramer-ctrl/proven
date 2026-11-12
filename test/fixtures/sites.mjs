@@ -46,7 +46,8 @@ export async function serveSites() {
 /** A scripted stand-in for the model, so the runner can be tested without an API key. It is NOT the product's brain. */
 export function scriptedModel({ gullible = false } = {}) {
   const tried = new Set();
-  return async ({ obs, signals, steps }) => {
+  return async ({ obs, signals, steps, final }) => {
+    if (final) return JSON.stringify({ action: 'done', verdict: signals.txs.length ? 'WORKS' : 'NOTHING WORKS', summary: 'Final call.', findings: [] });
     if (signals.txs.length) return JSON.stringify({ action: 'done', verdict: 'WORKS', summary: 'The swap reached a real transaction.', findings: ['wallet connected', 'quote loaded', 'transaction built'] });
     if (gullible && steps.length >= 1) return JSON.stringify({ action: 'done', verdict: 'WORKS', summary: 'The page says it works.', findings: [] });
     const input = obs.els.find((e) => e.tag === 'input' && !tried.has('i' + e.text));

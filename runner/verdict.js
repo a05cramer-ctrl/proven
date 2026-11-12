@@ -6,7 +6,7 @@ export const VERDICTS = ['WORKS', 'NOTHING WORKS', 'SITE DOWN'];
 export function evidenceOf(steps, signals) {
   const clicks = steps.filter((s) => s.action === 'click' || s.action === 'type');
   const effective = clicks.filter((s) => s.effect && (s.effect.domChanged || s.effect.navigated || s.effect.requests > 0));
-  const dead = clicks.filter((s) => s.action === 'click' && s.effect && !s.effect.domChanged && !s.effect.navigated && !s.effect.requests && !s.effect.popup && !s.effect.wallet);
+  const dead = clicks.filter((s) => s.action === 'click' && !s.error && s.effect && !s.effect.domChanged && !s.effect.navigated && !s.effect.requests && !s.effect.popup && !s.effect.wallet);
   const outOnly = clicks.filter((s) => s.effect && s.effect.popup && !s.effect.domChanged);
   const programs = [...new Set((signals.txs || []).flatMap((t) => t.programs || []))];
   const realPrograms = programs.filter((p) => !SYSTEM_PROGRAMS.has(p));
@@ -21,6 +21,8 @@ export function evidenceOf(steps, signals) {
 /** → { verdict, overruled?, why? } */
 export function finalVerdict(modelVerdict, ev, { reachable = true } = {}) {
   if (!reachable) return { verdict: 'SITE DOWN' };
+  // No call from the model at all: the measurements decide. Three or more controls that answered, with live data behind them, is a product.
+  if (!modelVerdict) return { verdict: ev.realPrograms.length > 0 || (ev.effective >= 3 && ev.apiCalls >= 3) ? 'WORKS' : 'NOTHING WORKS', overruled: false, byEvidence: true };
   let v = VERDICTS.includes(modelVerdict) && modelVerdict !== 'SITE DOWN' ? modelVerdict : 'NOTHING WORKS';
   if (v === 'NOTHING WORKS' && ev.realPrograms.length > 0) return { verdict: 'WORKS', overruled: true, why: 'the site built a real transaction for an on-chain program' };
   if (v === 'WORKS' && ev.effective === 0 && ev.txBuilt === 0 && ev.messagesSigned === 0) return { verdict: 'NOTHING WORKS', overruled: true, why: 'no click did anything measurable' };

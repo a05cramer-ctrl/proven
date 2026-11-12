@@ -1,9 +1,13 @@
 // Postgres (Neon) store for tests. `driver` = anything with query(text, params) → rows (Neon, or PGlite in tests).
 import { env, CACHE_HOURS, STALE_MINUTES } from './util.js';
 
+/** Bumped when the robot's rules change: verdicts made under older rules leave the wall and the cache. */
+export const RULES = 2;
+
 export const SCHEMA = [
   `CREATE TABLE IF NOT EXISTS tests (id BIGSERIAL PRIMARY KEY, mint TEXT NOT NULL, name TEXT NOT NULL DEFAULT '', symbol TEXT NOT NULL DEFAULT '', icon TEXT, site TEXT NOT NULL, status TEXT NOT NULL DEFAULT 'queued', verdict TEXT, overruled BOOLEAN NOT NULL DEFAULT false, summary TEXT, findings JSONB, lines JSONB, steps JSONB, evidence JSONB, video TEXT, poster TEXT, run_url TEXT, model TEXT, holder BOOLEAN NOT NULL DEFAULT false, error TEXT, ms INT, created_at TIMESTAMPTZ NOT NULL DEFAULT now(), started_at TIMESTAMPTZ, finished_at TIMESTAMPTZ)`,
   `ALTER TABLE tests ADD COLUMN IF NOT EXISTS frames INT NOT NULL DEFAULT 0`,
+  `ALTER TABLE tests ADD COLUMN IF NOT EXISTS rules INT NOT NULL DEFAULT 1`,
   `CREATE TABLE IF NOT EXISTS frames (test_id BIGINT NOT NULL, n INT NOT NULL, jpg TEXT NOT NULL, created_at TIMESTAMPTZ NOT NULL DEFAULT now(), PRIMARY KEY (test_id, n))`,
   `CREATE INDEX IF NOT EXISTS tests_mint ON tests (mint, id DESC)`,
   `CREATE INDEX IF NOT EXISTS tests_done ON tests (status, id DESC)`,
@@ -23,11 +27,11 @@ export function pgStore(driver) {
   return {
     /** Tests that never reported back are closed as failed, so a coin is not stuck "running" forever. */
     async sweep() { await q(`UPDATE tests SET status = 'failed', error = 'the test did not report back', finished_at = now() WHERE status IN ('queued','running') AND created_at < now() - ($1 || ' minutes')::interval`, [String(STALE_MINUTES)]); },
-    async add(t) { return fix((await q('INSERT INTO tests (mint, name, symbol, icon, site, holder) VALUES ($1,$2,$3,$4,$5,$6) RETURNING *', [t.mint, t.name || '', t.symbol || '', t.icon || null, t.site, !!t.holder]))[0]); },
+    async add(t) { return fix((await q('INSERT INTO tests (mint, name, symbol, icon, site, holder, rules) VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *', [t.mint, t.name || '', t.symbol || '', t.icon || null, t.site, !!t.holder, RULES]))[0]); },
     async get(id) { return fix((await q('SELECT * FROM tests WHERE id = $1', [id]))[0]); },
     /** The test that answers "was this coin tested today?": anything in flight, else the newest finished one inside the cache window. */
-    async current(mint) { return fix((await q(`SELECT * FROM tests WHERE mint = $1 AND (status IN ('queued','running') OR (status = 'done' AND finished_at > now() - ($2 || ' hours')::interval)) ORDER BY id DESC LIMIT 1`, [mint, String(CACHE_HOURS)]))[0]); },
-    async latestDone(mint) { return fix((await q(`SELECT * FROM tests WHERE mint = $1 AND status = 'done' ORDER BY id DESC LIMIT 1`, [mint]))[0]); },
+    async current(mint) { return fix((await q(`SELECT * FROM tests WHERE mint = $1 AND rules = $3 AND (status IN ('queued','running') OR (status = 'done' AND finished_at > now() - ($2 || ' hours')::interval)) ORDER BY id DESC LIMIT 1`, [mint, String(CACHE_HOURS), RULES]))[0]); },
+    async latestDone(mint) { return fix((await q(`SELECT * FROM tests WHERE mint = $1 AND status = 'done' AND rules = $2 ORDER BY id DESC LIMIT 1`, [mint, RULES]))[0]); },
     async countToday() { return Number((await q(`SELECT count(*)::int AS n FROM tests WHERE created_at > date_trunc('day', now() AT TIME ZONE 'utc') AT TIME ZONE 'utc' AND holder = false`))[0].n); },
     /** queued → running, once. */
     /** While a test runs: the steps so far and one more screen. The site reads these live. */
@@ -44,9 +48,9 @@ export function pgStore(driver) {
         [id, r.verdict, !!r.overruled, r.summary || '', J(r.findings || []), J(r.lines || []), J(r.steps || []), J(r.evidence || {}), r.video || null, r.poster || null, r.model || null, r.ms || null, r.run_url || null]))[0]);
     },
     async fail(id, error) { await q(`UPDATE tests SET status = 'failed', error = $2, finished_at = now() WHERE id = $1 AND status IN ('queued','running')`, [id, String(error).slice(0, 300)]); },
-    async recent(limit = 24) { return (await q(`SELECT id, mint, name, symbol, icon, site, verdict, summary, frames, finished_at FROM tests WHERE status = 'done' ORDER BY id DESC LIMIT $1`, [limit])).map(fix); },
+    async recent(limit = 24) { return (await q(`SELECT id, mint, name, symbol, icon, site, verdict, summary, frames, finished_at FROM tests WHERE status = 'done' AND rules = $2 ORDER BY id DESC LIMIT $1`, [limit, RULES])).map(fix); },
     async totals() {
-      const r = (await q(`SELECT count(*) FILTER (WHERE status = 'done')::int AS tests, count(*) FILTER (WHERE verdict = 'WORKS')::int AS works, count(*) FILTER (WHERE verdict = 'NOTHING WORKS')::int AS nothing, count(*) FILTER (WHERE verdict = 'SITE DOWN')::int AS down, count(*) FILTER (WHERE status IN ('queued','running'))::int AS in_flight, count(DISTINCT mint) FILTER (WHERE status = 'done')::int AS coins FROM tests`))[0];
+      const r = (await q(`SELECT count(*) FILTER (WHERE status = 'done')::int AS tests, count(*) FILTER (WHERE verdict = 'WORKS')::int AS works, count(*) FILTER (WHERE verdict = 'NOTHING WORKS')::int AS nothing, count(*) FILTER (WHERE verdict = 'SITE DOWN')::int AS down, count(*) FILTER (WHERE status IN ('queued','running'))::int AS in_flight, count(DISTINCT mint) FILTER (WHERE status = 'done')::int AS coins FROM tests WHERE rules = $1`, [RULES]))[0];
       return { tests: Number(r.tests), works: Number(r.works), nothing: Number(r.nothing), down: Number(r.down), in_flight: Number(r.in_flight), coins: Number(r.coins) };
     },
   };

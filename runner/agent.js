@@ -4,7 +4,7 @@ import bs58 from 'bs58';
 import { VersionedTransaction, Transaction, VersionedMessage } from '@solana/web3.js';
 import { walletStub } from './wallet-stub.js';
 import { observe } from './observe.js';
-import { SYSTEM, userMessage, parseAction } from './model.js';
+import { SYSTEM, userMessage, parseAction, finalMessage } from './model.js';
 import { evidenceOf, finalVerdict, evidenceLines } from './verdict.js';
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -12,7 +12,7 @@ const STATIC = /\.(png|jpe?g|gif|webp|avif|svg|ico|css|woff2?|ttf|otf|mp4|webm|m
 const ANALYTICS = /(google-analytics|googletagmanager|doubleclick|facebook|hotjar|segment|sentry|clarity|plausible|vercel-insights|vercel-scripts|cloudflareinsights|intercom|crisp|fonts\.g)/i;
 
 /** What the site shows for one step. */
-export const publicStep = (s) => ({ n: s.n, action: s.action, target: s.target || null, typed: s.typed, note: s.note || '', says: s.says || '', effect: s.effect, error: s.error, dead: !!(s.action === 'click' && s.effect && !s.effect.domChanged && !s.effect.navigated && !s.effect.requests && !s.effect.popup && !s.effect.wallet), left: s.effect?.left || (s.effect?.popup ? 'another site' : null), wallet: !!s.effect?.wallet });
+export const publicStep = (s) => ({ n: s.n, action: s.action, target: s.target || null, typed: s.typed, note: s.note || '', says: s.says || '', effect: s.effect, error: s.error, dead: !!(s.action === 'click' && !s.error && s.effect && !s.effect.domChanged && !s.effect.navigated && !s.effect.requests && !s.effect.popup && !s.effect.wallet), left: s.effect?.left || (s.effect?.popup ? 'another site' : null), wallet: !!s.effect?.wallet });
 
 export function programsOf(b64) {
   try {
@@ -86,9 +86,10 @@ export async function runTest(browser, { url, model, maxSteps = 12, budgetMs = 1
       try {
         if (act.action === 'click' || act.action === 'type') {
           const el = obs.els.find((e) => e.i === act.target);
-          if (!el) throw new Error(`no control ${act.target}`);
-          step.target = `${el.tag} "${el.text}"`;
-          const loc = page.locator(`[data-pv="${el.i}"]`).first();
+          const byText = !el && act.action === 'click' && act.text ? act.text.trim().slice(0, 60) : '';
+          if (!el && !byText) throw new Error('that control is not on the page');
+          step.target = el ? `${el.tag} "${el.text}"` : `"${byText}"`;
+          const loc = el ? page.locator(`[data-pv="${el.i}"]`).first() : page.getByText(byText, { exact: false }).last();
           await loc.scrollIntoViewIfNeeded({ timeout: 2500 }).catch(() => {});
           const box = await loc.boundingBox().catch(() => null);
           if (box) { await page.evaluate(([x, y]) => window.__pvCursor && window.__pvCursor(x, y, false), [box.x + box.width / 2, box.y + box.height / 2]).catch(() => {}); await sleep(520); await page.evaluate(([x, y]) => window.__pvCursor && window.__pvCursor(x, y, true), [box.x + box.width / 2, box.y + box.height / 2]).catch(() => {}); }
@@ -103,21 +104,25 @@ export async function runTest(browser, { url, model, maxSteps = 12, budgetMs = 1
       obs = await snap();
       const navigated = obs.url.split('#')[0] !== before.url.split('#')[0];
       const domChanged = navigated || Math.abs(obs.textLen - before.len) > 12 || obs.text !== before.text;
-      step.effect = { navigated, domChanged: act.action === 'scroll' ? false : domChanged, requests: counters.requests, wallet: counters.wallet, popup: counters.popup };
+      step.effect = { navigated, domChanged: act.action === 'scroll' ? false : (domChanged || (act.action === 'type' && !step.error)), requests: counters.requests, wallet: counters.wallet, popup: counters.popup };
       const leftHost = (() => { try { return new URL(obs.url).host.replace(/^www\./, ''); } catch { return siteHost; } })();
       if (navigated && leftHost !== siteHost && !leftHost.endsWith('.' + siteHost)) { step.effect.left = leftHost; step.effect.popup = step.effect.popup || obs.url; step.effect.navigated = false; step.effect.domChanged = false; await page.goBack({ timeout: 8000 }).catch(() => {}); await sleep(900); obs = await snap(); }
-      last = step.error ? `failed: ${step.error}` : [step.effect.left ? `left the site to ${step.effect.left} (went back)` : navigated ? `navigated to ${obs.url}` : '', step.effect.popup && !step.effect.left ? `opened another site in a new tab: ${String(step.effect.popup).slice(0, 80)} (closed)` : '', step.effect.domChanged && !navigated ? 'the page content changed' : '', step.effect.wallet ? `the wallet was called (${signals.connected ? 'connected' : ''}${signals.signedMessages ? ', message signed' : ''}${signals.txs.length ? `, ${signals.txs.length} transaction request(s) recorded and declined` : ''})` : '', step.effect.requests ? `${step.effect.requests} data request(s)` : ''].filter(Boolean).join('; ') || (act.action === 'scroll' ? 'scrolled' : 'NOTHING happened: no page change, no request, no wallet call');
+      if (act.action === 'type' && !step.error && !navigated && !counters.requests) step.effect.filled = true;
+      last = step.error ? `failed: ${step.error}` : step.effect.filled && !counters.wallet ? 'the field was filled in' : [step.effect.left ? `left the site to ${step.effect.left} (went back)` : navigated ? `navigated to ${obs.url}` : '', step.effect.popup && !step.effect.left ? `opened another site in a new tab: ${String(step.effect.popup).slice(0, 80)} (closed)` : '', step.effect.domChanged && !navigated ? 'the page content changed' : '', step.effect.wallet ? `the wallet was called (${signals.connected ? 'connected' : ''}${signals.signedMessages ? ', message signed' : ''}${signals.txs.length ? `, ${signals.txs.length} transaction request(s) recorded and declined` : ''})` : '', step.effect.requests ? `${step.effect.requests} data request(s)` : ''].filter(Boolean).join('; ') || (act.action === 'scroll' ? 'scrolled' : 'NOTHING happened: no page change, no request, no wallet call');
       history.push(`${n}. ${act.action}${step.target ? ' ' + step.target : ''}${step.typed ? ` = "${step.typed}"` : ''} → ${last}`);
       step.says = last;
       steps.push(step); await onStep(step, await frame(), steps);
     }
   }
   const finalUrl = page.url();
+  if (reachable && !modelOut.verdict) {
+    try { const a = parseAction(await model({ system: SYSTEM, user: finalMessage(history, evidenceLines(evidenceOf(steps, signals))), jpegB64: null, obs: { els: [] }, signals, steps, final: true })); if (a && a.verdict) modelOut = { verdict: a.verdict, summary: a.summary, findings: a.findings }; } catch { /* the evidence decides */ }
+  }
   await context.close();
   const evidence = evidenceOf(steps, signals);
   const fv = finalVerdict(modelOut.verdict, evidence, { reachable });
   return {
-    ...fv, modelVerdict: modelOut.verdict, summary: reachable ? modelOut.summary : 'The site did not load.', findings: modelOut.findings,
+    ...fv, modelVerdict: modelOut.verdict, summary: !reachable ? 'The site did not load.' : modelOut.summary || (fv.verdict === 'WORKS' ? 'The controls answered and live data loaded behind them.' : 'Nothing on the page did anything measurable.'), findings: modelOut.findings,
     evidence, lines: reachable ? evidenceLines(evidence) : ['the site did not answer'], steps: steps.map(publicStep),
     reachable, finalUrl, wallet: pub58, ms: Date.now() - started,
   };

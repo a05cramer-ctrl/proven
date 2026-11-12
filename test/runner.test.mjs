@@ -44,6 +44,7 @@ test('pure rules', () => {
   assert.equal(finalVerdict('WORKS', ev({})).verdict, 'NOTHING WORKS');
   assert.equal(finalVerdict('NOTHING WORKS', ev({ realPrograms: ['x'], txBuilt: 1 })).verdict, 'WORKS');
   assert.equal(finalVerdict(null, ev({ effective: 5 })).verdict, 'NOTHING WORKS');
+  assert.equal(finalVerdict(null, ev({ effective: 4, apiCalls: 9 })).verdict, 'WORKS');
   assert.equal(finalVerdict('WORKS', ev({ effective: 5 }), { reachable: false }).verdict, 'SITE DOWN');
   assert.equal(parseAction('sure! {"action":"click","target":3,"note":"x"} ok').target, 3);
   assert.equal(parseAction('{"action":"explode"}'), null); assert.equal(parseAction('nope'), null);
