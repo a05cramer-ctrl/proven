@@ -9,7 +9,10 @@ import { runTest, publicStep } from '../runner/agent.js';
 import { chatModel } from '../runner/model.js';
 
 /** Which model drives: the project's Vercel AI Gateway (no key to set up), or OpenRouter when a key is present. */
-export const MODELS = ['anthropic/claude-haiku-5.5', 'google/gemini-3.8-flash'];
+// Best first. Vercel's free AI Gateway tier only serves some models (403 on the rest), so the list ends with one it does serve;
+// with credit on the gateway the first one answers. A model that refused once is skipped for the life of the instance.
+export const MODELS = ['anthropic/claude-haiku-5.5', 'google/gemini-2.5-flash'];
+const refused = new Set();
 export function pickModel(req) {
   const names = env('PROVEN_MODEL') ? [env('PROVEN_MODEL'), ...MODELS] : MODELS;
   const key = env('OPENROUTER_API_KEY'); const token = env('AI_GATEWAY_API_KEY') || req.headers['x-vercel-oidc-token'] || env('VERCEL_OIDC_TOKEN');
@@ -17,8 +20,9 @@ export function pickModel(req) {
   const base = key ? 'https://openrouter.ai/api/v1' : 'https://ai-gateway.vercel.sh/v1';
   const fns = names.map((model) => chatModel({ apiKey: key || token, model, base }));
   let at = 0; // once a model fails, the rest of the test uses the next one
+  while (at < names.length - 1 && refused.has(names[at])) at++;
   const errs = [];
-  const fn = async (input) => { for (;;) { try { return await fns[at](input); } catch (e) { errs.push(`${names[at]}: ${String(e?.message).slice(0, 90)}`); if (at >= fns.length - 1) throw new Error(errs.slice(-2).join(' / ')); at++; } } };
+  const fn = async (input) => { for (;;) { try { return await fns[at](input); } catch (e) { errs.push(`${names[at]}: ${String(e?.message).slice(0, 90)}`); if (/http 40[13]/.test(String(e?.message))) refused.add(names[at]); if (at >= fns.length - 1) throw new Error(errs.slice(-2).join(' / ')); at++; } } };
   return { get name() { return names[at]; }, fn };
 }
 
