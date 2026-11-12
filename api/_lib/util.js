@@ -7,7 +7,7 @@ export const MEMO_PROGRAM = 'MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr';
 export const HOLDER_TIER = 1_000_000; // whole $PROVEN → re-test any coin any time, outside the daily cap
 export const CACHE_HOURS = 24; // one test per coin per day for everyone else
 export const DAILY_CAP_DEFAULT = 100; // tests a day across the whole site (each costs model time)
-export const STALE_MINUTES = 12; // a test that has not reported back by then counts as failed
+export const STALE_MINUTES = 6; // a test that has not reported back by then counts as failed
 export const RENT_MIN_LAMPORTS = 890_880n;
 /** Rent of one associated token account (165 bytes). The sender pays it when the receiver has no ATA yet. */
 export const ATA_RENT_LAMPORTS = 2_039_280n;

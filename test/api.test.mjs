@@ -81,7 +81,7 @@ test('a tested coin is served from cache for 24 h; a holder signature forces a f
   assert.equal(h.status, 200); assert.equal(h.json.test.id, 2); assert.equal(h.json.test.status, 'queued');
 });
 test('the daily cap stops free tests; a failed run closes a test; the feed adds up', async () => {
-  await pg.query(`INSERT INTO tests (mint, site, status, rules) VALUES ('a','https://a.example/','done', 2)`);
+  await pg.query(`INSERT INTO tests (mint, site, status, rules) VALUES ('a','https://a.example/','done', 3)`);
   const capped = await call('test', { method: 'POST', body: { mint: 'JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN' } });
   assert.ok([404, 429].includes(capped.status));
   await db.start(2); await db.fail(2, 'boom');

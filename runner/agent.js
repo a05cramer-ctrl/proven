@@ -54,7 +54,7 @@ export async function runTest(browser, { url, model, maxSteps = 12, budgetMs = 1
   page.on('requestfailed', (req) => { if (isData(req)) signals.failed++; });
   page.on('response', (res) => { if (res.status() >= 400 && isData(res.request())) signals.failed++; });
 
-  const steps = []; const history = [];
+  const steps = []; const history = []; let modelErrors = 0;
   /** One JPEG of the screen, as it looks right now (the green cursor is part of the page). */
   const frame = async () => { if (!frames) return null; try { return (await page.screenshot({ type: 'jpeg', quality: 48, scale: 'css' })).toString('base64'); } catch { return null; } };
   const started = Date.now();
@@ -76,7 +76,9 @@ export async function runTest(browser, { url, model, maxSteps = 12, budgetMs = 1
       const lastStep = n === maxSteps || Date.now() - started > budgetMs;
       let jpeg = null; try { jpeg = (await page.screenshot({ type: 'jpeg', quality: 55, scale: 'css' })).toString('base64'); } catch {}
       let act = null;
-      try { act = parseAction(await model({ system: SYSTEM, user: userMessage(obs, last, lastStep ? maxSteps : n, maxSteps, history), jpegB64: jpeg, obs, signals, steps })); } catch (e) { last = `model error: ${String(e.message).slice(0, 80)}`; }
+      let modelFailed = false;
+      try { act = parseAction(await model({ system: SYSTEM, user: userMessage(obs, last, lastStep ? maxSteps : n, maxSteps, history), jpegB64: jpeg, obs, signals, steps })); } catch (e) { modelFailed = true; modelErrors++; last = `model error: ${String(e.message).slice(0, 80)}`; }
+      if (modelFailed && modelErrors >= 2) throw new Error('the model stopped answering');
       if (!act) { if (lastStep) break; act = { action: 'wait', note: 'no valid action', target: null, text: '' }; }
       if (lastStep && act.action !== 'done') act = { ...act, action: 'done' };
       const step = { n, action: act.action, note: act.note, target: null, effect: null };

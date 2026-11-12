@@ -2,7 +2,7 @@
 import { env, CACHE_HOURS, STALE_MINUTES } from './util.js';
 
 /** Bumped when the robot's rules change: verdicts made under older rules leave the wall and the cache. */
-export const RULES = 2;
+export const RULES = 3;
 
 export const SCHEMA = [
   `CREATE TABLE IF NOT EXISTS tests (id BIGSERIAL PRIMARY KEY, mint TEXT NOT NULL, name TEXT NOT NULL DEFAULT '', symbol TEXT NOT NULL DEFAULT '', icon TEXT, site TEXT NOT NULL, status TEXT NOT NULL DEFAULT 'queued', verdict TEXT, overruled BOOLEAN NOT NULL DEFAULT false, summary TEXT, findings JSONB, lines JSONB, steps JSONB, evidence JSONB, video TEXT, poster TEXT, run_url TEXT, model TEXT, holder BOOLEAN NOT NULL DEFAULT false, error TEXT, ms INT, created_at TIMESTAMPTZ NOT NULL DEFAULT now(), started_at TIMESTAMPTZ, finished_at TIMESTAMPTZ)`,
